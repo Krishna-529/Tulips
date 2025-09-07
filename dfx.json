@@ -1,18 +1,21 @@
 {
   "canisters": {
-    "Tulips_backend": {
-      "main": "src/Tulips_backend/main.mo",
+    "dbank": {
+      "main": "src/Tulips_backend/dbank/main.mo",
       "type": "motoko"
     },
-    "Tulips_frontend": {
-      "dependencies": [
-        "Tulips_backend"
-      ],
-      "source": [
-        "src/Tulips_frontend/dist"
-      ],
+    "nft": {
+      "main": "src/Tulips_backend/nft/main.mo",
+      "type": "motoko"
+    },
+    "marketplace": {
+      "main": "src/Tulips_backend/marketplace/main.mo",
+      "type": "motoko"
+    },
+    "frontend": {
+      "dependencies": ["dbank", "nft", "marketplace"],
       "type": "assets",
-      "workspace": "Tulips_frontend"
+      "source": ["src/Tulips_frontend/dist"]
     }
   },
   "defaults": {
