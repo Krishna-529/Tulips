@@ -1,0 +1,243 @@
+body {
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  background: linear-gradient(135deg,#edf0fa 0%,#c4e0e5 100%);
+  margin: 0;
+  min-height: 100vh;
+}
+nav {
+  background: #4a56e2;
+  color: #fff;
+  padding: 0.85em 2em;
+  display: flex;
+  gap: 1em;
+  align-items: center;
+  font-size: 18px;
+  box-shadow: 0 1px 16px #4a56e220;
+}
+nav button, .btn {
+  background: linear-gradient(90deg,#608dff 50%,#8ab7ef 100%);
+  color: #fff;
+  border: none;
+  padding: 0.6em 1.35em;
+  font-size: 1em;
+  border-radius: 7px;
+  margin-right: 0.5em;
+  box-shadow: 0 2px 11px #a2b1fa20;
+  transition: background 0.13s, box-shadow .13s, transform 0.14s;
+  cursor: pointer;
+  font-weight: 500;
+  outline: none;
+}
+nav button:hover, .btn:hover, .btn:focus {
+  background: linear-gradient(90deg,#3955cf 50%,#5e7ae6 100%);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 8px 21px #99c2ff39;
+}
+.btn-cta {
+  background: linear-gradient(90deg,#39ca77 40%,#3b82f6 90%);
+}
+.btn-outline {
+  background: transparent;
+  color: #4661c9;
+  border: 1.5px solid #4661c9;
+}
+.skeleton {
+  background: linear-gradient(270deg, #e7e8fb 25%, #c9e2fa 50%, #e7e8fb 75%);
+  background-size: 400% 400%;
+  animation: skeletonmove 1.3s ease-in-out infinite;
+  border-radius: 12px;
+  min-height: 160px;
+  opacity: 0.65;
+}
+@keyframes skeletonmove {
+  0%{background-position:0% 50%;}
+  100%{background-position:100% 50%;}
+}
+.dashboard {
+  max-width: 600px;
+  margin: 2em auto 2em auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 40px #bdd3ff3c;
+  padding: 2em 2em 2.5em 2em;
+}
+.dash-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1.5px solid #e5eaf5;
+  margin-bottom: 1.5em;
+  gap: 9px;
+}
+.nft-list-grid, .auction-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.65em;
+  justify-content: flex-start;
+}
+.nft-card, .auction-card {
+  background: #fff;
+  border: 2px solid #d6e1fc;
+  padding: 1.5em;
+  border-radius: 16px;
+  min-width: 220px;
+  min-height: 260px;
+  box-shadow: 0 2px 22px #d2dcfa20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: .4em 0;
+  transition: box-shadow 0.15s,border .13s,transform .13s;
+  position: relative;
+}
+.nft-card:hover, .auction-card:hover {
+  border: 2.7px solid #4a94df;
+  box-shadow: 0 10px 40px #cad9f24d;
+  transform: translateY(-3px) scale(1.012);
+}
+.img-wrap {
+  background:#f7faff;
+  padding:16px 9px 9px 9px;
+  border-radius: 10px;
+  margin-bottom: .7em;
+  box-shadow:0 1px 8px #dbebff34;
+}
+.nft-card img,.auction-card img{border-radius:10px;}
+.card-body {
+  width: 100%;
+  text-align: center;
+}
+.chip {
+  display: inline-block;
+  padding: 0.28em 0.78em;
+  border-radius: 6px;
+  background: #edf2f7;
+  color: #3260be;
+  margin: 5px 3px 2px 0;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+.chip-orange {background: #fff3e0;color: #c47b14;}
+.chip-outline {background: transparent;border:1.2px solid #ccd4fa;}
+
+.balance-big {
+  font-size: 2em;
+  letter-spacing: 1.3px;
+  margin: 0.2em 0 1em 0;
+}
+.token {
+  font-weight: 700;
+  color: #5489ff;
+  font-size: 1.04em;
+}
+
+.account-card {
+  margin: 1em 0 2em 0;
+  background: #f2f5fa;
+  border-radius: 9px;
+  box-shadow: 0 2px 8px #b9d0fb35;
+  padding: 1.3em 1.2em;
+}
+.mono {
+  font-family: 'JetBrains Mono', Consolas, "SFMono-Regular", monospace;
+  font-size: 0.98em;
+  color: #2f4054;
+  background: #f5f6fd;
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin-bottom: 8px;
+}
+.empty-state {
+  color: #B5B6BF;
+  background: #f6fbfa;
+  font-style: italic;
+  text-align: center;
+  border-radius: 8px;
+  margin: 2em auto 1em auto;
+  padding: 1.2em;
+  min-width: 180px;
+}
+
+.input, .transfer-form input, .bid-form input {
+  font-size: 1em;
+  padding: 0.65em 1em;
+  border: 1.5px solid #b5b8e8;
+  border-radius: 8px;
+  margin: 0.5em 0 1em 0;
+  width: 92%;
+  display: block;
+  color: #374285;
+  background: #fff;
+  transition: border .14s,box-shadow .14s;
+}
+.input:focus, .transfer-form input:focus, .bid-form input:focus {
+  border-color: #60a7ff;
+  box-shadow: 0 2px 9px #a5caff52;
+  outline:none;
+}
+.timer {
+  font-size: 1.1em;
+  color: #fca311;
+  margin-right: 2px;
+}
+.transfer-form, .bid-form {
+  margin-top: 1.2em;
+  background: #f3f7ff;
+  border-radius: 10px;
+  padding: 1em 1.1em 0.8em 1.1em;
+  box-shadow: 0 1px 4px #dce8ff34;
+}
+.notif,.notify-green {
+  background: linear-gradient(90deg,#dafee6 40%,#d2f5e9 100%);
+  color: #1f7541;
+  border-radius: 7px;
+  margin: 1.1em auto;
+  padding: 0.4em 1.2em;
+  font-weight: 500;
+  text-align: center;
+  max-width: 21em;
+  letter-spacing:.01em;
+}
+
+@media (max-width:700px) {
+  .dashboard { max-width: 99vw; padding: 1em; }
+  .nft-card,.auction-card { min-width: 92vw; }
+  .nft-list-grid, .auction-list { flex-direction: column; gap: 1em; }
+  .account-card { padding: 1em 0.7em;}
+}
+.hero {
+  background: linear-gradient(135deg,#f0faff 10%,#cbe3f0 100%);
+  text-align: center;
+  padding: 5em 0 4em 0;
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0 10px 52px #b4dbff28;
+}
+.hero h1 {
+  font-size: 2.6em;
+  letter-spacing: 0.03em;
+  font-weight: bold;
+  color: #272866;
+  margin-bottom: 16px;
+}
+.hero h2 {
+  font-weight: 400;
+  margin-bottom: 0.7em;
+  color: #333;
+  font-size: 1.35em;
+}
+.hero-content {max-width: 600px; margin: 0 auto;}
+.hero .btn {font-size: 1.05em;}
+.app-startup, .spinner {
+  display: flex; align-items: center; justify-content: center;
+}
+.app-startup {flex-direction:column;height:65vh;}
+.spinner {
+  width:38px; height:38px; border-radius:50%;
+  border:4px solid #e5eeff; border-top:4px solid #4a8fd7;
+  animation: spin 0.95s linear infinite;
+  margin-bottom:10px
+}@keyframes spin{100%{transform: rotate(360deg)}}
+.mint-form {margin:1em auto 2em auto; border-radius:10px; padding:1em 1.6em 1em 1.6em; background:#f5f7ff; box-shadow:0 1px 8px #e7eafc28; max-width:350px;}
+.mint-form-row {margin-bottom:1.2em;text-align:left;}
+.mint-form label {font-size:0.98em;color:#4362a6;display:block;margin-bottom:.3em;}
+.img-preview {margin:0.3em 0 .6em auto; text-align:center;}
+.img-preview img {border-radius:7px;box-shadow:0 2px 12px #d4d6ea34;}
