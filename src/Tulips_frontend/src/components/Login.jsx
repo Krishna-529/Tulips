@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+// import "../main.css";
+
 import { AuthClient } from "@dfinity/auth-client";
 export default function Login({ onAuth }) {
   const [auth, setAuth] = useState(null);

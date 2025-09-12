@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import MintNFTForm from "./MintNFTForm";
 import NFTCard from "./NFTCard";
+// import "../main.css";
+
 
 export default function NFTDashboard({ nft, marketPrincipal, principal, getMyTokens, approveForMarket, mintNFT, listForAuction }) {
   const [myNFTs, setMyNFTs] = useState([]);

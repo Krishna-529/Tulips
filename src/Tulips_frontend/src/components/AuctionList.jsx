@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+// import "../main.css";
+
 
 export default function AuctionList({ getAuctions, principal, bid, settle }) {
   const [auctions, setAuctions] = useState([]);

@@ -1,4 +1,6 @@
 import React from "react";
+// import "../main.css";
+
 export default function NFTCard({ tokenId, metadata, owner, principal, approved, onApprove, onList }) {
   const isOwner = owner === principal;
   return (

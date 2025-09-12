@@ -6,7 +6,7 @@
   "scripts": {
     "setup": "npm i && dfx canister create Tulips_backend && dfx generate Tulips_backend && dfx deploy",
     "start": "vite --port 3000",
-    "prebuild": "dfx generate",
+    "prebuild": "dfx generate dbank && dfx generate nft && dfx generate marketplace",
     "build": "tsc && vite build",
     "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\""
   },
@@ -15,7 +15,7 @@
     "@dfinity/auth-client": "^3.2.4",
     "@dfinity/candid": "^3.2.4",
     "@dfinity/identity": "^3.2.4",
-    "@dfinity/principal": "^2.1.3",
+    "@dfinity/principal": "^3.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

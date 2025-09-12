@@ -7,13 +7,13 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '../../.env' });
 
 export default defineConfig({
-  root: '.', // points to Tulips_frontend folder
-  base: './', // ensures relative paths for Vite build
+  root: '.', // ✅ current folder (Tulips_frontend)
+  base: './',
   build: {
-    outDir: '../../dist/frontend', // output relative to project root
+    outDir: 'dist', // ✅ dist folder outside
     emptyOutDir: true,
     rollupOptions: {
-      input: './index.html', // explicitly set entry
+      input: './index.html', // ✅ relative to Tulips_frontend
     },
   },
   optimizeDeps: {
@@ -40,7 +40,9 @@ export default defineConfig({
     alias: [
       {
         find: 'declarations',
-        replacement: fileURLToPath(new URL('../declarations', import.meta.url)),
+        replacement: fileURLToPath(
+          new URL('../declarations', import.meta.url)
+        ),
       },
     ],
     dedupe: ['@dfinity/agent'],

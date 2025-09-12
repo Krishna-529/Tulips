@@ -1,4 +1,6 @@
 import React from "react";
+// import "../main.css";
+
 export default function Home() {
   return (
     <section className="hero">
