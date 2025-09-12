@@ -3,6 +3,7 @@ import { useNFT } from "../hooks/useNFT";
 import { useMarketplace } from "../hooks/useMarketplace";
 import NFTCard from "../components/NFTCard";
 import MintNFTForm from "../components/MintNFTForm";
+// import "../main.css";
 
 export default function Marketplace() {
   const { principal, getMyTokens, approveForMarket, mintNFT } = useNFT();
