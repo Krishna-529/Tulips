@@ -1,67 +1,118 @@
-import React, { useEffect, useState } from "react";
-import MintNFTForm from "./MintNFTForm";
-import NFTCard from "./NFTCard";
-// import "../main.css";
+import React, { useState } from "react";
+import Marketplace from "./Marketplace";
+import OwnedNFTs from "./OwnedNFTs";
+import MintNFT from "./MintNFT";
 
+export default function NFTDashboard() {
+  const [activeTab, setActiveTab] = useState("marketplace");
 
-export default function NFTDashboard({ nft, marketPrincipal, principal, getMyTokens, approveForMarket, mintNFT, listForAuction }) {
-  const [myNFTs, setMyNFTs] = useState([]);
-  const [mintMsg, setMintMsg] = useState("");
-  const [loading, setLoading] = useState(true);
+  const tabs = [
+    { id: "marketplace", label: "Marketplace", icon: "🏪" },
+    { id: "owned", label: "My NFTs", icon: "📦" },
+    { id: "mint", label: "Create NFT", icon: "✨" }
+  ];
 
-  useEffect(() => {
-    if (getMyTokens)
-      getMyTokens().then(data => {
-        setMyNFTs(data);
-        setLoading(false);
-      });
-  }, [getMyTokens]);
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case "marketplace":
+        return <Marketplace />;
+      case "owned":
+        return <OwnedNFTs />;
+      case "mint":
+        return <MintNFT />;
+      default:
+        return <Marketplace />;
+    }
+  };
 
   return (
-    <div className="dashboard">
-      <div className="dash-header">
-        <h2>
-          <span role="img" aria-label="gallery">🖼️</span> My NFTs
-        </h2>
+    <div className="nft-dashboard">
+      <div className="dashboard-tabs">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <span className="tab-icon">{tab.icon}</span>
+            <span className="tab-label">{tab.label}</span>
+          </button>
+        ))}
       </div>
-      <MintNFTForm
-        onMint={async meta => {
-          setMintMsg("Minting...");
-          await mintNFT(meta);
-          setMintMsg("Minted!");
-          setTimeout(() => {
-            setMintMsg("");
-            setLoading(true);
-            getMyTokens().then(data => {
-              setMyNFTs(data);
-              setLoading(false);
-            });
-          }, 900);
-        }}
-      />
-      {mintMsg && <div className="notif notify-green">{mintMsg}</div>}
 
-      <div className="nft-list-grid">
-        {loading
-          ? Array(2).fill(0).map((_,i)=>
-              <div className="nft-card skeleton" key={i} />
-            )
-          : (myNFTs.length === 0)
-            ? <div className="empty-state">No NFTs minted yet.</div>
-            : myNFTs.map(({ id, metadata, owner, approved }) =>
-              <NFTCard
-                key={id}
-                tokenId={id}
-                metadata={metadata}
-                owner={owner}
-                principal={principal}
-                approved={approved}
-                onApprove={tokenId => approveForMarket(tokenId, marketPrincipal)}
-                onList={tokenId => listForAuction(tokenId, 1, 86400)}
-              />
-            )
-        }
+      <div className="dashboard-content">
+        {renderActiveTab()}
       </div>
     </div>
   );
 }
+
+
+
+// import React, { useEffect, useState } from "react";
+// import MintNFTForm from "./MintNFTForm";
+// import NFTCard from "./NFTCard";
+// // import "../main.css";
+
+
+// export default function NFTDashboard({ nft, marketPrincipal, principal, getMyTokens, approveForMarket, mintNFT, listForAuction }) {
+//   const [myNFTs, setMyNFTs] = useState([]);
+//   const [mintMsg, setMintMsg] = useState("");
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     if (getMyTokens)
+//       getMyTokens().then(data => {
+//         setMyNFTs(data);
+//         setLoading(false);
+//       });
+//   }, [getMyTokens]);
+
+//   return (
+//     <div className="dashboard">
+//       <div className="dash-header">
+//         <h2>
+//           <span role="img" aria-label="gallery">🖼️</span> My NFTs
+//         </h2>
+//       </div>
+//       <MintNFTForm
+//         onMint={async meta => {
+//           setMintMsg("Minting...");
+//           await mintNFT(meta);
+//           setMintMsg("Minted!");
+//           setTimeout(() => {
+//             setMintMsg("");
+//             setLoading(true);
+//             getMyTokens().then(data => {
+//               setMyNFTs(data);
+//               setLoading(false);
+//             });
+//           }, 900);
+//         }}
+//       />
+//       {mintMsg && <div className="notif notify-green">{mintMsg}</div>}
+
+//       <div className="nft-list-grid">
+//         {loading
+//           ? Array(2).fill(0).map((_,i)=>
+//               <div className="nft-card skeleton" key={i} />
+//             )
+//           : (myNFTs.length === 0)
+//             ? <div className="empty-state">No NFTs minted yet.</div>
+//             : myNFTs.map(({ id, metadata, owner, approved }) =>
+//               <NFTCard
+//                 key={id}
+//                 tokenId={id}
+//                 metadata={metadata}
+//                 owner={owner}
+//                 principal={principal}
+//                 approved={approved}
+//                 onApprove={tokenId => approveForMarket(tokenId, marketPrincipal)}
+//                 onList={tokenId => listForAuction(tokenId, 1, 86400)}
+//               />
+//             )
+//         }
+//       </div>
+//     </div>
+//   );
+// }

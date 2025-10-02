@@ -25,7 +25,7 @@
         "npm install --prefix src/Tulips_frontend",
         "npm run build --prefix src/Tulips_frontend"
       ],
-      "dependencies": ["dbank", "nft", "marketplace"]
+      "dependencies": ["dbank", "nft", "marketplace"],
     }
   },
   "defaults": {

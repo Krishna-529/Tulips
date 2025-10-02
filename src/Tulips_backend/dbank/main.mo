@@ -281,4 +281,4 @@ actor class ICRC1Token() = this {
   })
 };
 
-};
+}

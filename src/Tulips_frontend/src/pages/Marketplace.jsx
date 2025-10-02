@@ -1,50 +1,49 @@
-import React, { useEffect, useState } from "react";
-import { useNFT } from "../hooks/useNFT";
+import React, { useState, useEffect } from "react";
 import { useMarketplace } from "../hooks/useMarketplace";
 import NFTCard from "../components/NFTCard";
-import MintNFTForm from "../components/MintNFTForm";
-// import "../main.css";
+import OwnedNFTs from "../components/OwnedNFTs";
+import MintNFT from "../components/MintNFT";
 
-export default function Marketplace() {
-  const { principal, getMyTokens, approveForMarket, mintNFT } = useNFT();
-  const { market, listForAuction, getAuctions, bid, settle } = useMarketplace();
-  const [myNFTs, setMyNFTs] = useState([]);
-  const [auctions, setAuctions] = useState([]);
+export default function Marketplace({ nftActor, marketActor, principal }) {
+  const { nfts, loading, txMsg, fetchNFTs, mintNFT, placeBid, finalizeSale } =
+    useMarketplace(nftActor, marketActor, principal);
 
-  useEffect(() => { getMyTokens().then(setMyNFTs); }, [getMyTokens]);
-  useEffect(() => { getAuctions().then(setAuctions); }, [getAuctions]);
+  useEffect(() => {
+    fetchNFTs();
+  }, [fetchNFTs]);
+
+  const ownedNFTs = nfts.filter((n) => n.owner === principal);
+  const forSaleNFTs = nfts.filter((n) => n.owner !== principal && n.forSale);
 
   return (
-    <div>
-      <h2>Marketplace</h2>
-      <MintNFTForm onMint={async meta => { await mintNFT(meta); setTimeout(()=>getMyTokens().then(setMyNFTs), 1000); }} />
-      <h3>Your NFTs</h3>
-      <div>
-        {myNFTs.map(({id, metadata, owner, approved}) =>
-          <NFTCard
-            key={id}
-            tokenId={id}
-            metadata={metadata}
-            owner={owner}
-            principal={principal}
-            approved={approved}
-            onApprove={tokenId => approveForMarket(tokenId, market.actorPrincipal)}
-            onList={tokenId => listForAuction(tokenId, 1, 86400)}
-          />
-        )}
-      </div>
-      <h3>Active Auctions</h3>
-      <div>
-        {auctions.map(a => 
-          <div key={a.tokenId} className="nft-card" style={{borderColor:"#f2b575"}}>
-            <h4>{a.metadata.name}</h4>
-            <img src={a.metadata.uri} alt={a.metadata.name} height={120}/>
-            <div>Min: {a.minBid}, Highest: {a.highestBid}, Owner: {a.owner.slice(0,8)}...</div>
-            <button onClick={() => bid(a.tokenId, a.highestBid + Math.ceil(a.highestBid*0.05) + 1 )}>Bid +5%</button>
-            {a.owner === principal && <button onClick={() => settle(a.tokenId)}>Settle</button>}
-          </div>
-        )}
-      </div>
+    <div className="dashboard marketplace-dashboard">
+      <h2>🌷 NFT Marketplace</h2>
+
+      <MintNFT mintNFT={mintNFT} />
+
+      {txMsg && <div className="notif">{txMsg}</div>}
+
+      <h3>🎨 Owned NFTs</h3>
+      <OwnedNFTs nfts={ownedNFTs} />
+
+      <h3>🛒 NFTs for Sale/Auction</h3>
+      {loading ? (
+        <div>Loading NFTs...</div>
+      ) : forSaleNFTs.length === 0 ? (
+        <div>No NFTs available</div>
+      ) : (
+        <div className="nft-grid">
+          {forSaleNFTs.map((nft) => (
+            <NFTCard
+              key={nft.id}
+              nft={nft}
+              principal={principal}
+              placeBid={placeBid}
+              finalizeSale={finalizeSale}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

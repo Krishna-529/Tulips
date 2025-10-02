@@ -28,8 +28,7 @@ export default function Bank() {
       setPayoutClaimed(true);
       setMsg("Payout already claimed.");
     } else if (result === "Payout Successful") {
-      setPayoutClaimed(true);
-      setMsg("Claimed! Refreshing...");
+      setMsg("🎉 Payout successful! Refreshing...");
       setTimeout(() => {
         setMsg("");
       }, 1200);

@@ -1,40 +1,84 @@
 import { useEffect, useState, useCallback } from "react";
-import { getActors } from "../utils/ic";
 
-export function useMarketplace() {
-  const [market, setMarket] = useState(null);
-  const [principal, setPrincipal] = useState(null);
+export function useMarketplace(nftActor, marketActor, principal) {
+  const [nfts, setNFTs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [txMsg, setTxMsg] = useState("");
 
-  useEffect(() => {
-    getActors().then(({ market, principal }) => {
-      setMarket(market);
-      setPrincipal(principal);
-    });
-  }, []);
+  const fetchNFTs = useCallback(async () => {
+    if (!nftActor) return;
+    setLoading(true);
+    try {
+      const all = await nftActor.getAllNFTs();
+      setNFTs(all);
+    } catch (err) {
+      console.error("Fetch NFTs error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [nftActor]);
 
-  const listForAuction = useCallback(async (tokenId, minBid, durationSec) => {
-    if (!market) return;
-    try { return await market.listForAuction(tokenId, BigInt(minBid), BigInt(durationSec)); }
-    catch { return false; }
-  }, [market]);
+  const mintNFT = useCallback(
+    async (price) => {
+      if (!nftActor) return;
+      setTxMsg("Minting NFT...");
+      try {
+        const res = await nftActor.mintNFT(price);
+        setTxMsg(res);
+        await fetchNFTs();
+      } catch (err) {
+        console.error(err);
+        setTxMsg("Minting failed");
+      } finally {
+        setTimeout(() => setTxMsg(""), 2500);
+      }
+    },
+    [nftActor, fetchNFTs]
+  );
 
-  const getAuctions = useCallback(async () => {
-    if (!market) return [];
-    try { return await market.getActiveAuctions() || []; }
-    catch { return []; }
-  }, [market]);
+  const placeBid = useCallback(
+    async (nftId, bidAmount) => {
+      if (!marketActor) return;
+      setTxMsg("Placing bid...");
+      try {
+        const res = await marketActor.placeBid(nftId, bidAmount);
+        setTxMsg(res);
+        await fetchNFTs();
+      } catch (err) {
+        console.error(err);
+        setTxMsg("Bid failed");
+      } finally {
+        setTimeout(() => setTxMsg(""), 2500);
+      }
+    },
+    [marketActor, fetchNFTs]
+  );
 
-  const bid = useCallback(async (tokenId, amount) => {
-    if (!market || !principal) return;
-    try { return await market.bid(tokenId, BigInt(amount)); }
-    catch { return false; }
-  }, [market, principal]);
+  const finalizeSale = useCallback(
+    async (nftId) => {
+      if (!marketActor) return;
+      setTxMsg("Finalizing sale...");
+      try {
+        const res = await marketActor.finalizeSale(nftId);
+        setTxMsg(res);
+        await fetchNFTs();
+      } catch (err) {
+        console.error(err);
+        setTxMsg("Finalize failed");
+      } finally {
+        setTimeout(() => setTxMsg(""), 2500);
+      }
+    },
+    [marketActor, fetchNFTs]
+  );
 
-  const settle = useCallback(async (tokenId) => {
-    if (!market) return;
-    try { return await market.settleAuction(tokenId); }
-    catch { return false; }
-  }, [market]);
-
-  return { market, principal, listForAuction, getAuctions, bid, settle };
+  return {
+    nfts,
+    loading,
+    txMsg,
+    fetchNFTs,
+    mintNFT,
+    placeBid,
+    finalizeSale,
+  };
 }

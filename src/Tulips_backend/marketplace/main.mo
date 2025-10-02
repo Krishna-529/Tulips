@@ -8,8 +8,10 @@ import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Nat8 "mo:base/Nat8";
 import Blob "mo:base/Blob";
+// import ExperimentalHttp "mo:base/ExperimentalHttp";
 
-actor Marketplace {
+actor class Marketplace(dBankId : Principal) = this {
+
 
   // ---------------- NFT & Marketplace Types ----------------
 
@@ -50,7 +52,7 @@ actor Marketplace {
   system func preupgrade() {
     stableFreezes := Iter.toArray(freezes.entries());    
     stableNFTs := Iter.toArray(nfts.entries());
-    stableFreezes := Iter.toArray(freezes.entries());
+    // stableFreezes := Iter.toArray(freezes.entries());
 };
 
 system func postupgrade() {
@@ -66,10 +68,10 @@ system func postupgrade() {
         nfts.put(id, nft);
     };
 
-    freezes := TrieMap.TrieMap(equalTuple, hashTuple);
-    for ((key, amount) in stableFreezes.vals()) {
-        freezes.put(key, amount);
-    };
+    // freezes := TrieMap.TrieMap(equalTuple, hashTuple);
+    // for ((key, amount) in stableFreezes.vals()) {
+    //     freezes.put(key, amount);
+    // };
 };
 
 stable var stableNFTs : [(Nat, NFT)] = [];
@@ -93,11 +95,11 @@ var nfts : TrieMap.TrieMap<Nat, NFT> = TrieMap.TrieMap(
       memo : ?[Nat8];
       created_at_time : ?Nat64;
     }) -> async TransferResult;
-  } = actor "aaaaa-aa";
+  } = actor (Principal.toText(dBankId));
 
 
   // ---------------- Minting ----------------
-  public shared(msg) func mintNFT(desiredPrice : Nat) : async Text {
+  public shared(msg) func mintNFT(name: Nat,  desiredPrice : Nat) : async Text {
     // Random mint fee between 40–60%
     let rnd = await Random.blob();
     // Corrected the way a random Nat is generated from a Blob.
@@ -105,7 +107,7 @@ var nfts : TrieMap.TrieMap<Nat, NFT> = TrieMap.TrieMap(
     let feePercent = 40 + r; // 40–60
 
     let mintFee = (desiredPrice * feePercent) / 100;
-    let finalPrice = desiredPrice - mintFee;
+    let finalPrice = desiredPrice;
 
     let nft : NFT = {
       id = nextNFTId;
@@ -214,7 +216,7 @@ var nfts : TrieMap.TrieMap<Nat, NFT> = TrieMap.TrieMap(
               // Used a principal literal, which is safer than 'fromText'.
               let _ = await dBank.icrc1_transfer({
                 from_subaccount = null;
-                to = { owner = Principal.fromText("aaaaa-aa"); subaccount = null };
+                to = { owner = dBankId; subaccount = null };
                 amount = fee;
                 fee = null;
                 memo = null;
