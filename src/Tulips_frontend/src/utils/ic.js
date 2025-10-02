@@ -6,18 +6,26 @@ import { idlFactory as bank_idl, canisterId as bank_id } from "../../../declarat
 
 export async function getActors() {
   const auth = await AuthClient.create();
-  let identity;
-  if (await auth.isAuthenticated()) identity = auth.getIdentity();
-  else {
+
+  // Ensure login if not authenticated
+  if (!(await auth.isAuthenticated())) {
     await auth.login({ identityProvider: "https://identity.ic0.app/#authorize" });
-    identity = auth.getIdentity();
   }
+
+  const identity = auth.getIdentity();
   const agent = new HttpAgent({ identity });
-  if (process.env.DFX_NETWORK === "local") await agent.fetchRootKey();
+
+  // Required for local development
+  if (process.env.DFX_NETWORK !== "ic") {
+    await agent.fetchRootKey();
+  }
 
   const nft = Actor.createActor(nft_idl, { agent, canisterId: nft_id });
   const market = Actor.createActor(market_idl, { agent, canisterId: market_id });
   const bank = Actor.createActor(bank_idl, { agent, canisterId: bank_id });
-  const principal = identity.getPrincipal().toText();
+
+  // Safe principal extraction
+  const principal = identity.getPrincipal ? identity.getPrincipal().toText() : "anonymous";
+
   return { nft, market, bank, principal, authClient: auth };
 }

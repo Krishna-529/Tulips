@@ -1,0 +1,434 @@
+/* =========================================
+   NFT Dashboard Tabs
+   ========================================= */
+.nft-dashboard {
+  max-width: 1200px;
+  margin: 2em auto;
+  padding: 0 1em;
+}
+
+.dashboard-tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2em;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 0.5em;
+  box-shadow: var(--card-shadow);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  background: transparent;
+  border: none;
+  padding: 0.8em 1.5em;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.tab-btn:hover, .tab-btn:focus {
+  background: #f3f4f6;
+  color: var(--primary);
+  outline: none;
+}
+
+.tab-btn.active {
+  background: linear-gradient(90deg, var(--primary) 50%, var(--accent) 100%);
+  color: white;
+}
+
+.tab-icon {
+  font-size: 1.2em;
+}
+
+/* =========================================
+   NFT Cards
+   ========================================= */
+.nft-grid, .owned-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5em;
+  margin-top: 2em;
+}
+
+.nft-card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.nft-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(70, 99, 253, 0.15);
+}
+
+.nft-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.nft-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nft-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e5edff, #c4d9ff);
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+.nft-info {
+  padding: 1.2em;
+}
+
+.nft-title {
+  font-size: 1.2em;
+  font-weight: 700;
+  margin-bottom: 0.8em;
+  color: #1f2937;
+}
+
+.nft-owner, .nft-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6em;
+}
+
+.label {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 0.9em;
+}
+
+.owner-principal {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  color: var(--primary);
+  background: #f0f4ff;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+}
+
+.price-amount {
+  font-weight: 700;
+  color: #059669;
+  font-size: 1.1em;
+}
+
+/* =========================================
+   Auction Info
+   ========================================= */
+.auction-info {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: 8px;
+  padding: 0.8em;
+  margin: 0.8em 0;
+  border-left: 4px solid #f59e0b;
+}
+
+.auction-status {
+  font-weight: 700;
+  color: #d97706;
+  margin-bottom: 0.5em;
+  font-size: 0.9em;
+}
+
+.time-remaining {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4em;
+}
+
+.time {
+  font-weight: 600;
+  color: #d97706;
+}
+
+.time.expired {
+  color: #dc2626;
+  font-weight: 700;
+  animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.4; }
+}
+
+.min-bid {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+}
+
+.min-amount {
+  font-weight: 600;
+  color: #059669;
+}
+
+/* =========================================
+   Action Buttons
+   ========================================= */
+.nft-actions, .bid-actions, .auction-actions {
+  margin-top: 1em;
+  display: flex;
+  gap: 0.5em;
+}
+
+.btn-bid, .btn-auction, .btn-finalize {
+  flex: 1;
+  padding: 0.6em 1em;
+  font-weight: 600;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-bid, .btn-auction {
+  background: linear-gradient(90deg, #7c3aed, #5b21b6); /* unified */
+}
+
+.btn-finalize {
+  background: linear-gradient(90deg, #059669, #047857);
+}
+
+.btn-bid:hover, .btn-auction:hover, .btn-finalize:hover {
+  filter: brightness(1.1);
+}
+
+.btn-owned {
+  background: #e5e7eb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.owner-badge {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.5em 1em;
+  border-radius: 6px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+/* =========================================
+   Marketplace & Owned Containers
+   ========================================= */
+.marketplace-container, .owned-nfts-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1em;
+}
+
+.marketplace-header, .owned-header {
+  text-align: center;
+  margin-bottom: 2em;
+}
+
+.marketplace-header h2, .owned-header h2 {
+  font-size: 2.2em;
+  font-weight: 800;
+  color: #1f2937;
+  margin: 0 0 0.3em 0;
+}
+
+.marketplace-header p, .owned-header p {
+  color: #6b7280;
+  font-size: 1.1em;
+}
+
+/* =========================================
+   Stats & Filters
+   ========================================= */
+.marketplace-stats, .collection-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2em;
+  margin-top: 1.5em;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 2em;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 0.9em;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.marketplace-filters {
+  display: flex;
+  justify-content: center;
+  gap: 0.5em;
+  margin-bottom: 2em;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 2px solid #e5e7eb;
+  color: #6b7280;
+  padding: 0.6em 1.2em;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.filter-btn:hover, .filter-btn:focus {
+  border-color: var(--primary);
+  color: var(--primary);
+  outline: none;
+}
+
+.filter-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+/* =========================================
+   Empty & Connect States
+   ========================================= */
+.empty-marketplace, .empty-collection, .connect-notice {
+  text-align: center;
+  padding: 3em 2em;
+  color: #6b7280;
+}
+
+.empty-icon {
+  font-size: 4em;
+  margin-bottom: 0.5em;
+}
+
+.empty-marketplace h3, .empty-collection h3, .connect-notice h3 {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+  color: #374151;
+}
+
+/* =========================================
+   Modals
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1em;
+}
+
+.modal-content {
+  background: white;
+  border-radius: var(--border-radius);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5em 1.5em 0 1.5em;
+  margin-bottom: 1em;
+}
+
+.modal-header h3 {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.2em;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover, .modal-close:focus {
+  background: #f3f4f6;
+  color: #374151;
+  outline: none;
+}
+
+/* =========================================
+   Responsive Adjustments
+   ========================================= */
+@media (max-width: 768px) {
+  .nft-grid, .owned-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .dashboard-tabs {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .nft-summary {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .nft-preview {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nft-grid, .owned-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tab-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
