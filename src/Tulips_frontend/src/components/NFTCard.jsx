@@ -1,6 +1,36 @@
 import React, { useState, useEffect } from "react";
+import Base64Image from "./Base64Image";
 
-export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidButton = true }) {
+export default function OwnedNFTCard({ nft }) {
+  const cardStyle = {
+    opacity: nft.forSale ? 0.5 : 1, // fade when for sale
+    transition: "opacity 0.3s ease",
+    border: "1px solid #ccc",
+    borderRadius: "10px",
+    padding: "10px",
+    textAlign: "center",
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+    backgroundColor: "#fff",
+  };
+
+  return (
+    <div className="nft-card" style={cardStyle}>
+      <Base64Image base64String={nft.image} alt={nft.name} />
+      <h3>
+        {nft.name} #{nft.id}
+      </h3>
+      <p>Current Price: {nft.price} DAMN</p>
+      {nft.forSale ? (
+        <p style={{ color: "orange", fontWeight: "bold" }}>Listed for Sale</p>
+      ) : (
+        <p style={{ color: "gray" }}>Not for Sale</p>
+      )}
+    </div>
+  );
+}
+
+
+function auctionedNFTCard({ nft, currentUser, onBid, onFinalize, showBidButton = true }) {
   const [timeLeft, setTimeLeft] = useState("");
   const [isExpired, setIsExpired] = useState(false);
   
@@ -93,55 +123,3 @@ export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidBu
     </div>
   );
 }
-
-
-
-// import React, { useState, useEffect } from "react";
-// import { useMarketplace } from "../hooks/useMarketplace";
-// import NFTCard from "../components/NFTCard";
-// import OwnedNFTs from "../components/OwnedNFTs";
-// import MintNFT from "../components/MintNFT";
-
-// export default function Marketplace({ nftActor, marketActor, principal }) {
-//   const { nfts, loading, txMsg, fetchNFTs, mintNFT, placeBid, finalizeSale } =
-//     useMarketplace(nftActor, marketActor, principal);
-
-//   useEffect(() => {
-//     fetchNFTs();
-//   }, [fetchNFTs]);
-
-//   const ownedNFTs = nfts.filter((n) => n.owner === principal);
-//   const forSaleNFTs = nfts.filter((n) => n.owner !== principal && n.forSale);
-
-//   return (
-//     <div className="dashboard marketplace-dashboard">
-//       <h2>🌷 NFT Marketplace</h2>
-
-//       <MintNFT mintNFT={mintNFT} />
-
-//       {txMsg && <div className="notif">{txMsg}</div>}
-
-//       <h3>🎨 Owned NFTs</h3>
-//       <OwnedNFTs nfts={ownedNFTs} />
-
-//       <h3>🛒 NFTs for Sale/Auction</h3>
-//       {loading ? (
-//         <div>Loading NFTs...</div>
-//       ) : forSaleNFTs.length === 0 ? (
-//         <div>No NFTs available</div>
-//       ) : (
-//         <div className="nft-grid">
-//           {forSaleNFTs.map((nft) => (
-//             <NFTCard
-//               key={nft.id}
-//               nft={nft}
-//               principal={principal}
-//               placeBid={placeBid}
-//               finalizeSale={finalizeSale}
-//             />
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
