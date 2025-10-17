@@ -4,37 +4,6 @@ import { getActors } from "../utils/ic";
 import { Principal } from "@dfinity/principal";
 import { useBank } from "./useBank";
 
-
-// async function uploadToPinata(base64Image, name) {
-//   const pinataJWT = process.env.REACT_APP_PINATA_JWT; // Use JWT token
-
-//   // Remove the "data:image/png;base64," prefix
-//   const fileData = base64Image.split(",")[1];
-
-//   const formData = new FormData();
-//   formData.append(
-//     "file",
-//     new Blob([Uint8Array.from(atob(fileData), (c) => c.charCodeAt(0))], {
-//       type: "image/png",
-//     }),
-//     `${name}.png`
-//   );
-
-//   const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
-//     method: "POST",
-//     headers: {
-//       Authorization: `Bearer ${pinataJWT}`,
-//     },
-//     body: formData,
-//   });
-
-//   if (!res.ok) throw new Error("Failed to upload to Pinata");
-
-//   const data = await res.json();
-//   return `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`;
-// }
-
-
 export function useNFT() {
   const { getBalance} = useBank();
   const [nftCanister, setNftCanister] = useState(null);
@@ -50,8 +19,13 @@ export function useNFT() {
   }, []);
 
   // useNFT.js
+
 const mintNFT = useCallback(
   async (metadata) => {
+    if (!marketplace) {
+      console.log("Marketplace canister not loaded yet!");
+      return { success: false, error: "Marketplace not ready" };
+    }
     const bal = await getBalance();
     console.log(bal);
     if(bal === "Error"){
@@ -65,13 +39,27 @@ const mintNFT = useCallback(
       return{success: false, error: "Insufficient Balance"}
     }
 
-    
-    return {success: true, error: null};
+    try {
+      // Call the backend Motoko function
+      const response = await marketplace.mintNFT(metadata);
 
-  }
+      // The backend currently returns a text message, parse ID from it
+      const match = response.match(/NFT minted with ID (\d+)/);
+      const tokenId = match ? parseInt(match[1]) : null;
+
+      return {
+        success: true,
+        error: null,
+        tokenId,
+        message: response, // optional full message from backend
+      };
+    } catch (err) {
+      console.error("Minting error:", err);
+      return { success: false, error: err.message || "Minting failed" };
+    }
+  },
+  [marketplace]
 );
-
-
 
   // Get NFT details
   const getNFTDetails = useCallback(async (nftId) => {
@@ -91,23 +79,29 @@ const mintNFT = useCallback(
     try {
       const nfts = await marketplace.getAllNFTs();
       return nfts.map(nft => ({
-        id: nft.id.toString(),
-        owner: nft.owner.toString(),
-        price: nft.price.toString(),
-        forSale: nft.forSale
-      }));
+      id: nft.id.toString(),
+      owner: nft.owner.toString(),
+      name: nft.name,
+      image: nft.image,
+      price: nft.price.toString(),
+      forSale: nft.forSale
+    }));
     } catch (err) {
       console.error("Get all NFTs error:", err);
       return [];
     }
   }, [marketplace]);
 
-  // Get NFTs owned by current user
+
   const getUserNFTs = useCallback(async () => {
     if (!marketplace || !principal) return [];
     const all = await getAllNFTs();
-    return all.filter(nft => nft.owner === principal);
+
+    // Make sure both sides are compared as strings
+    return all.filter(nft => nft.owner === principal.toString());
   }, [marketplace, principal, getAllNFTs]);
+
+
 
   // Place bid on NFT
   const placeBid = useCallback(async (nftId, bidAmount) => {

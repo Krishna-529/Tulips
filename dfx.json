@@ -6,17 +6,12 @@
       "candid": "src/Tulips_backend/dbank/main.did",
       "wasm": "src/Tulips_backend/dbank/main.wasm"
     },
-    "nft": {
-      "main": "src/Tulips_backend/nft/main.mo",
-      "type": "motoko",
-      "candid": "src/Tulips_backend/nft/main.did",
-      "wasm": "src/Tulips_backend/nft/main.wasm"
-    },
     "marketplace": {
       "main": "src/Tulips_backend/marketplace/main.mo",
       "type": "motoko",
       "candid": "src/Tulips_backend/marketplace/main.did",
-      "wasm": "src/Tulips_backend/marketplace/main.wasm"
+      "wasm": "src/Tulips_backend/marketplace/main.wasm",
+      "dependencies": ["dbank"]
     },
     "frontend": {
       "type": "assets",
@@ -25,7 +20,7 @@
         "npm install --prefix src/Tulips_frontend",
         "npm run build --prefix src/Tulips_frontend"
       ],
-      "dependencies": ["dbank", "nft", "marketplace"],
+      "dependencies": ["dbank", "marketplace"]
     }
   },
   "defaults": {
