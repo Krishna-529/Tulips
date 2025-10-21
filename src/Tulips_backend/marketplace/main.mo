@@ -11,6 +11,8 @@ import Blob "mo:base/Blob";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
 import Dbank "canister:dbank";
+import Nat32 "mo:base/Nat32";
+
 
 actor Marketplace {
   public type NFT = {
@@ -95,8 +97,11 @@ actor Marketplace {
         return "Mint failed: " # errText;
       };
       case null {
+        // Hash based on nextNFTId and caller to get a unique NFT ID
+        let idHash : Nat32 = Text.hash(Principal.toText(msg.caller) # "-" # Nat.toText(nextNFTId));
+        let nftId : Nat = Nat32.toNat(idHash);
         let nft : NFT = {
-          id = nextNFTId;
+          id = nftId;
           owner = msg.caller;
           name = meta.name;
           image = meta.image;
@@ -112,7 +117,38 @@ actor Marketplace {
                 " (Fee deducted: " # Nat.toText(mintFee) # ")";
       };
     };
-};
+  };
+
+  //Bidding Protocol
+  let IC : actor {
+    sha256_hash : shared (data : Blob) -> async Blob;
+  } = actor ("aaaaa-aa");
+
+  public func subaccountHash(user : Principal, nftId : Nat) : async Blob {
+    let input : Blob = Text.encodeUtf8(Principal.toText(user) # "-" # Nat.toText(nftId));
+    let digest : Blob = await IC.sha256_hash(input);
+    return digest; // 32-byte Blob
+  };
+
+  public shared(msg) func transferOwnership(to : Principal, nftId : Nat) : async Text {
+      switch (nfts.get(nftId)) {
+          case (?nft) {
+              let updatedNFT : NFT = {
+                  id = nft.id;
+                  owner = to;
+                  name = nft.name;
+                  image = nft.image;
+                  price = nft.price;
+                  forSale = false; // remove from sale
+              };
+              nfts.put(nftId, updatedNFT);
+              return "NFT " # Nat.toText(nftId) # " ownership transferred to " # Principal.toText(to) # " and removed from sale";
+          };
+          case null {
+              return "Transfer failed: NFT does not exist";
+          };
+      };
+  };
 
 
   public shared(msg) func getAllNFTs() : async [NFT] {
