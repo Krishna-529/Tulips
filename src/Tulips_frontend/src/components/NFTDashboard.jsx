@@ -7,9 +7,9 @@ export default function NFTDashboard() {
   const [activeTab, setActiveTab] = useState("marketplace");
 
   const tabs = [
-    { id: "marketplace", label: "Marketplace", icon: "🏪" },
-    { id: "owned", label: "My NFTs", icon: "📦" },
-    { id: "mint", label: "Create NFT", icon: "✨" }
+    { id: "marketplace", label: "Marketplace" },
+    { id: "owned", label: "My NFTs" },
+    { id: "mint", label: "Create NFT" }
   ];
 
   const renderActiveTab = () => {
@@ -33,8 +33,8 @@ export default function NFTDashboard() {
             key={tab.id}
             className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
             onClick={() => setActiveTab(tab.id)}
+            data-testid={`tab-${tab.id}`}
           >
-            <span className="tab-icon">{tab.icon}</span>
             <span className="tab-label">{tab.label}</span>
           </button>
         ))}
