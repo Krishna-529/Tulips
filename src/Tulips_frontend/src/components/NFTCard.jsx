@@ -6,8 +6,8 @@ export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidBu
   const [isExpired, setIsExpired] = useState(false);
   
   const isOwner = nft.owner === currentUser;
-  const canBid = showBidButton && !isOwner && nft.forSale && !isExpired;
-  const canFinalize = isOwner && nft.forSale && isExpired;
+  const canBid = showBidButton && !isOwner && nft.status === "isOnBid" && !isExpired;
+  const canFinalize = isOwner && nft.status === "isOnBid" && isExpired;
 
   useEffect(() => {
     if (!nft.bidEndTime) return;
@@ -60,9 +60,9 @@ export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidBu
         ) : (
           <div className="nft-placeholder">NFT #{nft.id}</div>
         )}
-        {nft.forSale && (
-          <div className={`nft-badge ${nft.isOnBid ? 'auction' : 'sale'}`}>
-            {nft.isOnBid ? 'On Auction' : 'For Sale'}
+        {(nft.status === "isOnSale" || nft.status === "isOnBid") && (
+          <div className={`nft-badge ${nft.status === "isOnBid" ? 'auction' : 'sale'}`}>
+            {nft.status === "isOnBid" ? 'On Auction' : 'For Sale'}
           </div>
         )}
       </div>
@@ -78,7 +78,7 @@ export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidBu
           {formatPrice(nft.price)} <span className="token">DAMN</span>
         </div>
 
-        {nft.forSale && nft.bidEndTime && (
+        {nft.status === "isOnBid" && nft.bidEndTime && (
           <div className="auction-info">
             <div className="time-left">Time Left: {timeLeft}</div>
             <div className="min-bid">Min Next Bid: {formatPrice(getMinBidAmount())} DAMN</div>
@@ -102,11 +102,6 @@ export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidBu
               data-testid={`finalize-button-${nft.id}`}
             >
               Finalize Auction
-            </button>
-          )}
-          {isOwner && !nft.forSale && (
-            <button className="btn btn-secondary" disabled>
-              Owned by You
             </button>
           )}
         </div>

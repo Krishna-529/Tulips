@@ -24,7 +24,7 @@ export default function Marketplace() {
     setLoading(true);
     try {
       const allNfts = await getAllNFTs();
-      setNfts(allNfts.filter(nft => nft.forSale || nft.isOnBid));
+      setNfts(allNfts.filter(nft => nft.status === "isOnSale" || nft.status === "isOnBid"));
     } catch (err) {
       console.error(err);
       setMessage("Failed to load marketplace NFTs");
@@ -37,7 +37,7 @@ export default function Marketplace() {
     setRefreshing(true);
     try {
       const allNfts = await getAllNFTs();
-      setNfts(allNfts.filter(nft => nft.forSale || nft.isOnBid));
+      setNfts(allNfts.filter(nft => nft.status === "isOnSale" || nft.status === "isOnBid"));
     } catch (err) {
       console.error(err);
     }
@@ -93,13 +93,13 @@ export default function Marketplace() {
   };
 
   const filteredNFTs = sortNFTs(nfts.filter(nft => {
-    if (filter === "auction") return nft.isOnBid;
-    if (filter === "buy-now") return !nft.isOnBid && nft.forSale;
+    if (filter === "auction") return nft.status === "isOnBid";
+    if (filter === "buy-now") return nft.status === "isOnSale";
     return true;
   }));
 
-  const auctionCount = nfts.filter(nft => nft.isOnBid).length;
-  const buyNowCount = nfts.filter(nft => !nft.isOnBid && nft.forSale).length;
+  const auctionCount = nfts.filter(nft => nft.status === "isOnBid").length;
+  const buyNowCount = nfts.filter(nft => nft.status === "isOnSale").length;
 
   if (loading) {
     return (
@@ -182,7 +182,7 @@ export default function Marketplace() {
         <div className="nft-grid" data-testid="marketplace-grid">
           {filteredNFTs.map(nft => (
             <NFTCard
-              key={`${nft.id}-${nft.price}-${nft.isOnBid}`}
+              key={`${nft.id}-${nft.price}-${nft.status}`}
               nft={nft}
               currentUser={principal}
               onBid={handleBidClick}
