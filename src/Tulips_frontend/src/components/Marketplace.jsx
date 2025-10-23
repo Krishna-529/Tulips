@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNFT } from "../hooks/useNFT";
 import NFTCard from "./NFTCard";
-// import BidNFT from "./BidNFT";
+import BidNFT from "./BidNFT";
 
 export default function Marketplace() {
   const { getAllNFTs, finalizeBid, principal } = useNFT();
@@ -11,12 +11,12 @@ export default function Marketplace() {
   const [selectedNft, setSelectedNft] = useState(null);
   const [showBidModal, setShowBidModal] = useState(false);
   const [message, setMessage] = useState("");
-  const [filter, setFilter] = useState("all"); // all, auction, buy-now
-  const [sortBy, setSortBy] = useState("newest"); // newest, price-low, price-high
+  const [filter, setFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
     loadNFTs();
-    const interval = setInterval(refreshMarketplace, 30000); // Refresh every 30s
+    const interval = setInterval(refreshMarketplace, 30000);
     return () => clearInterval(interval);
   }, [getAllNFTs]);
 
@@ -55,7 +55,7 @@ export default function Marketplace() {
   };
 
   const handleBidSuccess = () => {
-    setMessage("Bid placed successfully! 🎉");
+    setMessage("Bid placed successfully!");
     refreshMarketplace();
     setTimeout(() => setMessage(""), 3000);
   };
@@ -66,7 +66,7 @@ export default function Marketplace() {
       const result = await finalizeBid(tokenId);
       if (result.success) {
         setMessage(result.winner ? 
-          `Auction finalized! Winner: ${result.winner.slice(0,8)}... 🏆` : 
+          `Auction finalized! Winner: ${result.winner.slice(0,8)}...` : 
           "Auction ended with no valid bids"
         );
         refreshMarketplace();
@@ -83,9 +83,9 @@ export default function Marketplace() {
     const sorted = [...nfts];
     switch (sortBy) {
       case "price-low":
-        return sorted.sort((a,b) => parseInt(a.currentPrice || a.price) - parseInt(b.currentPrice || b.price));
+        return sorted.sort((a,b) => parseInt(a.price) - parseInt(b.price));
       case "price-high":
-        return sorted.sort((a,b) => parseInt(b.currentPrice || b.price) - parseInt(a.currentPrice || a.price));
+        return sorted.sort((a,b) => parseInt(b.price) - parseInt(a.price));
       case "newest":
       default:
         return sorted.sort((a,b) => parseInt(b.id) - parseInt(a.id));
@@ -101,25 +101,55 @@ export default function Marketplace() {
   const auctionCount = nfts.filter(nft => nft.isOnBid).length;
   const buyNowCount = nfts.filter(nft => !nft.isOnBid && nft.forSale).length;
 
-  if (loading) return <div className="marketplace-container"><p>Loading marketplace...</p></div>;
+  if (loading) {
+    return (
+      <div className="marketplace-container">
+        <p style={{ color: 'var(--text-secondary)' }}>Loading marketplace...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="marketplace-container">
-      <div className="marketplace-header">
+      <div style={{ marginBottom: '2rem' }}>
         <h2>NFT Marketplace</h2>
-        <p>Discover and bid on unique digital assets</p>
-        <div className="marketplace-stats">
-          <div>Total Listed: {nfts.length}</div>
-          <div>Live Auctions: {auctionCount}</div>
-          <div>Buy Now: {buyNowCount}</div>
+        <p style={{ color: 'var(--text-secondary)' }}>Discover and bid on unique digital assets</p>
+        <div style={{ 
+          display: 'flex', 
+          gap: '2rem', 
+          marginTop: '1rem',
+          color: 'var(--text-secondary)',
+          fontSize: '0.9rem'
+        }}>
+          <div>Total Listed: <strong style={{ color: 'var(--accent-primary)' }}>{nfts.length}</strong></div>
+          <div>Live Auctions: <strong style={{ color: 'var(--warning)' }}>{auctionCount}</strong></div>
+          <div>Buy Now: <strong style={{ color: 'var(--success)' }}>{buyNowCount}</strong></div>
         </div>
       </div>
 
       <div className="marketplace-controls">
         <div className="filters">
-          <button className={filter==="all"?"active":""} onClick={()=>setFilter("all")}>All ({nfts.length})</button>
-          <button className={filter==="auction"?"active":""} onClick={()=>setFilter("auction")}>Auctions ({auctionCount})</button>
-          <button className={filter==="buy-now"?"active":""} onClick={()=>setFilter("buy-now")}>Buy Now ({buyNowCount})</button>
+          <button 
+            className={filter==="all"?"active":""} 
+            onClick={()=>setFilter("all")}
+            data-testid="filter-all"
+          >
+            All ({nfts.length})
+          </button>
+          <button 
+            className={filter==="auction"?"active":""} 
+            onClick={()=>setFilter("auction")}
+            data-testid="filter-auction"
+          >
+            Auctions ({auctionCount})
+          </button>
+          <button 
+            className={filter==="buy-now"?"active":""} 
+            onClick={()=>setFilter("buy-now")}
+            data-testid="filter-buy-now"
+          >
+            Buy Now ({buyNowCount})
+          </button>
         </div>
 
         <div className="sort">
@@ -131,21 +161,28 @@ export default function Marketplace() {
           </select>
         </div>
 
-        <button onClick={refreshMarketplace} disabled={refreshing}>
-          {refreshing ? "Refreshing..." : "🔄 Refresh"}
+        <button 
+          onClick={refreshMarketplace} 
+          disabled={refreshing}
+          className="btn btn-secondary"
+          data-testid="refresh-marketplace"
+        >
+          {refreshing ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 
       {filteredNFTs.length === 0 ? (
         <div className="empty-marketplace">
           <h3>No NFTs Available</h3>
-          <p>{filter==="auction"?"No live auctions":filter==="buy-now"?"No buy-now NFTs":"No NFTs listed"}.</p>
+          <p>
+            {filter==="auction"?"No live auctions":filter==="buy-now"?"No buy-now NFTs":"No NFTs listed"}.
+          </p>
         </div>
       ) : (
-        <div className="nft-grid">
+        <div className="nft-grid" data-testid="marketplace-grid">
           {filteredNFTs.map(nft => (
             <NFTCard
-              key={`${nft.id}-${nft.currentPrice}-${nft.isOnBid}`}
+              key={`${nft.id}-${nft.price}-${nft.isOnBid}`}
               nft={nft}
               currentUser={principal}
               onBid={handleBidClick}
@@ -163,8 +200,11 @@ export default function Marketplace() {
         onSuccess={handleBidSuccess}
       />
 
-      {message && <div className={`notif ${message.includes("successfully") || message.includes("finalized")?"":"notif-disabled"}`}>{message}</div>}
+      {message && (
+        <div className={`notif ${message.includes("successfully") || message.includes("finalized")?"":"notif-disabled"}`}>
+          {message}
+        </div>
+      )}
     </div>
   );
 }
-

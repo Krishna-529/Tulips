@@ -22,6 +22,7 @@ actor Marketplace {
     image : Text;
     price : Nat;
     forSale : Bool;
+    
   };
 
   public type Metadata = {
