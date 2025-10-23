@@ -18,8 +18,6 @@ export function useNFT() {
     });
   }, []);
 
-  // useNFT.js
-
 const mintNFT = useCallback(
   async (metadata) => {
     if (!marketplace) {
@@ -84,7 +82,7 @@ const mintNFT = useCallback(
       name: nft.name,
       image: nft.image,
       price: nft.price.toString(),
-      forSale: nft.forSale
+      status: nft.status
     }));
     } catch (err) {
       console.error("Get all NFTs error:", err);
@@ -127,6 +125,42 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
+  // List NFT for sale
+  const listForSale = useCallback(async (nftId, price) => {
+    if (!marketplace) return { success: false, error: "Marketplace not ready" };
+    try {
+      const res = await marketplace.listForSale(BigInt(nftId), BigInt(price));
+      return { success: true, message: res };
+    } catch (err) {
+      console.error("List for sale error:", err);
+      return { success: false, error: err.message };
+    }
+  }, [marketplace]);
+
+  // List NFT for auction
+  const listForAuction = useCallback(async (nftId, startingPrice, duration) => {
+    if (!marketplace) return { success: false, error: "Marketplace not ready" };
+    try {
+      const res = await marketplace.listForAuction(BigInt(nftId), BigInt(startingPrice), BigInt(duration));
+      return { success: true, message: res };
+    } catch (err) {
+      console.error("List for auction error:", err);
+      return { success: false, error: err.message };
+    }
+  }, [marketplace]);
+
+  // Withdraw NFT from sale
+  const withdrawNFT = useCallback(async (nftId) => {
+    if (!marketplace) return { success: false, error: "Marketplace not ready" };
+    try {
+      const res = await marketplace.withdrawNFT(BigInt(nftId));
+      return { success: true, message: res };
+    } catch (err) {
+      console.error("Withdraw NFT error:", err);
+      return { success: false, error: err.message };
+    }
+  }, [marketplace]);
+
   return {
     nftCanister,
     marketplace,
@@ -136,6 +170,9 @@ const mintNFT = useCallback(
     getAllNFTs,
     getUserNFTs,
     placeBid,
-    finalizeBid
+    finalizeBid,
+    listForSale,
+    listForAuction,
+    withdrawNFT
   };
 }

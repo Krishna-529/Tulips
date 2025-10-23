@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNFT } from "../hooks/useNFT";
 import Base64Image from "./Base64Image";
+import ListNFTModal from "./ListNFTModal";
 
 export default function OwnedNFTs() {
-  const { getUserNFTs, principal } = useNFT();
+  const { getUserNFTs, principal, withdrawNFT } = useNFT();
   const [ownedNFTs, setOwnedNFTs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [selectedNft, setSelectedNft] = useState(null);
+  const [showListModal, setShowListModal] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(null);
 
   useEffect(() => {
     if (principal) loadOwnedNFTs();
@@ -45,8 +49,41 @@ export default function OwnedNFTs() {
     );
   }
 
-  const listedNFTs = ownedNFTs.filter(n => n.forSale);
-  const notListedNFTs = ownedNFTs.filter(n => !n.forSale);
+  const listedNFTs = ownedNFTs.filter(n => n.status !== "Owned");
+  const notListedNFTs = ownedNFTs.filter(n => n.status === "Owned");
+
+  const handleListClick = (nft) => {
+    setSelectedNft(nft);
+    setShowListModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowListModal(false);
+    setSelectedNft(null);
+  };
+
+  const handleListSuccess = () => {
+    setMessage("NFT listed successfully!");
+    loadOwnedNFTs();
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const handleWithdraw = async (nftId) => {
+    setWithdrawing(nftId);
+    try {
+      const result = await withdrawNFT(nftId);
+      if (result.success) {
+        setMessage("NFT withdrawn from sale successfully!");
+        loadOwnedNFTs();
+      } else {
+        setMessage(`Failed to withdraw: ${result.error}`);
+      }
+    } catch (err) {
+      setMessage(`Error: ${err.message}`);
+    }
+    setTimeout(() => setMessage(""), 3000);
+    setWithdrawing(null);
+  };
 
   return (
     <div className="owned-nfts-container">
@@ -78,14 +115,14 @@ export default function OwnedNFTs() {
             <div 
               key={nft.id} 
               className="nft-card"
-              style={{ opacity: nft.forSale ? 0.7 : 1 }}
+              style={{ opacity: nft.status !== "Owned" ? 0.7 : 1 }}
               data-testid={`owned-nft-${nft.id}`}
             >
               <div className="nft-image">
                 <Base64Image base64String={nft.image} alt={nft.name} />
-                {nft.forSale && (
-                  <div className="nft-badge sale">
-                    Listed for Sale
+                {nft.status !== "Owned" && (
+                  <div className={`nft-badge ${nft.status === "isOnBid" ? 'auction' : 'sale'}`}>
+                    {nft.status === "isOnBid" ? "On Auction" : "Listed for Sale"}
                   </div>
                 )}
               </div>
@@ -94,10 +131,31 @@ export default function OwnedNFTs() {
                 <div className="nft-price">
                   {parseInt(nft.price).toLocaleString()} <span className="token">DAMN</span>
                 </div>
-                {nft.forSale ? (
-                  <p style={{ color: 'var(--success)', marginTop: '0.5rem' }}>Listed for Sale</p>
+                {nft.status !== "Owned" ? (
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <p style={{ color: 'var(--success)', marginBottom: '0.75rem' }}>
+                      {nft.status === "isOnBid" ? "On Auction" : "Listed for Sale"}
+                    </p>
+                    <button 
+                      className="btn btn-secondary" 
+                      onClick={() => handleWithdraw(nft.id)}
+                      disabled={withdrawing === nft.id}
+                      style={{ width: '100%' }}
+                    >
+                      {withdrawing === nft.id ? <span className="spinner"></span> : "Withdraw from Sale"}
+                    </button>
+                  </div>
                 ) : (
-                  <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Not for Sale</p>
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>Not Listed</p>
+                    <button 
+                      className="btn" 
+                      onClick={() => handleListClick(nft)}
+                      style={{ width: '100%' }}
+                    >
+                      List NFT
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -105,8 +163,15 @@ export default function OwnedNFTs() {
         </div>
       )}
 
+      <ListNFTModal
+        nft={selectedNft}
+        isOpen={showListModal}
+        onClose={handleCloseModal}
+        onSuccess={handleListSuccess}
+      />
+
       {message && (
-        <div className="notif notif-disabled">
+        <div className={`notif ${message.includes("successfully") ? "" : "notif-disabled"}`}>
           {message}
         </div>
       )}

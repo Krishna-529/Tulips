@@ -6,7 +6,7 @@ import "./nft-style.css";
 
 export default function App() {
   const { principal } = useBank();
-  const [currentSection, setCurrentSection] = useState("nft");
+  const [currentSection, setCurrentSection] = useState("bank");
 
   const sections = [
     { id: "nft", label: "NFT Marketplace" },
