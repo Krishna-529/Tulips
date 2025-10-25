@@ -71,19 +71,48 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
-  // Get all marketplace NFTs
+  // Get all marketplace NFTs with auction details
   const getAllNFTs = useCallback(async () => {
     if (!marketplace) return [];
     try {
       const nfts = await marketplace.getAllNFTs();
-      return nfts.map(nft => ({
-      id: nft.id.toString(),
-      owner: nft.owner.toString(),
-      name: nft.name,
-      image: nft.image,
-      price: nft.price.toString(),
-      status: nft.status
-    }));
+      
+      // Fetch auction details for each NFT that's on auction
+      const nftsWithAuctionData = await Promise.all(
+        nfts.map(async (nft) => {
+          const baseNft = {
+            id: nft.id.toString(),
+            owner: nft.owner.toString(),
+            name: nft.name,
+            image: nft.image,
+            price: nft.price.toString(),
+            status: nft.status
+          };
+
+          // If NFT is on auction, fetch auction details
+          if (nft.status === "isOnBid") {
+            try {
+              const auctionInfo = await marketplace.getAuctionInfo(nft.id);
+              if (auctionInfo && auctionInfo.length > 0) {
+                const auction = auctionInfo[0];
+                return {
+                  ...baseNft,
+                  price: auction.highestBid.toString(), // Use highest bid as price
+                  bidEndTime: auction.endTime.toString(),
+                  startPrice: auction.startPrice.toString(),
+                  highestBidder: auction.highestBidder.length > 0 ? auction.highestBidder[0].toString() : null
+                };
+              }
+            } catch (err) {
+              console.error(`Error fetching auction info for NFT ${nft.id}:`, err);
+            }
+          }
+
+          return baseNft;
+        })
+      );
+
+      return nftsWithAuctionData;
     } catch (err) {
       console.error("Get all NFTs error:", err);
       return [];
@@ -113,14 +142,14 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
-  // Finalize NFT sale
+  // Finalize auction
   const finalizeBid = useCallback(async (nftId) => {
     if (!marketplace) return { success: false, error: "Marketplace not ready" };
     try {
-      const res = await marketplace.finalizeSale(BigInt(nftId));
+      const res = await marketplace.finalizeAuction(BigInt(nftId));
       return { success: true, message: res };
     } catch (err) {
-      console.error("Finalize bid error:", err);
+      console.error("Finalize auction error:", err);
       return { success: false, error: err.message };
     }
   }, [marketplace]);
@@ -129,7 +158,7 @@ const mintNFT = useCallback(
   const listForSale = useCallback(async (nftId, price) => {
     if (!marketplace) return { success: false, error: "Marketplace not ready" };
     try {
-      const res = await marketplace.listForSale(BigInt(nftId), BigInt(price));
+      const res = await marketplace.placeForSale(BigInt(nftId), BigInt(price));
       return { success: true, message: res };
     } catch (err) {
       console.error("List for sale error:", err);
@@ -149,14 +178,26 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
-  // Withdraw NFT from sale
+  // Withdraw NFT from sale/auction
   const withdrawNFT = useCallback(async (nftId) => {
     if (!marketplace) return { success: false, error: "Marketplace not ready" };
     try {
-      const res = await marketplace.withdrawNFT(BigInt(nftId));
+      const res = await marketplace.withdrawAuction(BigInt(nftId));
       return { success: true, message: res };
     } catch (err) {
       console.error("Withdraw NFT error:", err);
+      return { success: false, error: err.message };
+    }
+  }, [marketplace]);
+
+  // Buy NFT directly
+  const buyNFT = useCallback(async (nftId) => {
+    if (!marketplace) return { success: false, error: "Marketplace not ready" };
+    try {
+      const res = await marketplace.buyNFT(BigInt(nftId));
+      return { success: true, message: res };
+    } catch (err) {
+      console.error("Buy NFT error:", err);
       return { success: false, error: err.message };
     }
   }, [marketplace]);
@@ -173,6 +214,7 @@ const mintNFT = useCallback(
     finalizeBid,
     listForSale,
     listForAuction,
-    withdrawNFT
+    withdrawNFT,
+    buyNFT
   };
 }

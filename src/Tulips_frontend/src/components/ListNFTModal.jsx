@@ -6,6 +6,7 @@ export default function ListNFTModal({ nft, isOpen, onClose, onSuccess }) {
   const [listType, setListType] = useState("sale");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("24");
+  const [durationUnit, setDurationUnit] = useState("hours"); // "minutes" or "hours"
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -21,8 +22,9 @@ export default function ListNFTModal({ nft, isOpen, onClose, onSuccess }) {
       if (listType === "sale") {
         result = await listForSale(nft.id, parseInt(price));
       } else {
-        // Convert hours to nanoseconds for auction duration
-        const durationNs = parseInt(duration) * 3600 * 1_000_000_000;
+        // Convert to nanoseconds for auction duration
+        const multiplier = durationUnit === "minutes" ? 60 : 3600;
+        const durationNs = parseInt(duration) * multiplier * 1_000_000_000;
         result = await listForAuction(nft.id, parseInt(price), durationNs);
       }
 
@@ -94,22 +96,66 @@ export default function ListNFTModal({ nft, isOpen, onClose, onSuccess }) {
           </div>
 
           {listType === "auction" && (
-            <div className="form-group">
-              <label>Auction Duration (hours)</label>
-              <select
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                required
-              >
-                <option value="1">1 hour</option>
-                <option value="6">6 hours</option>
-                <option value="12">12 hours</option>
-                <option value="24">24 hours</option>
-                <option value="48">48 hours</option>
-                <option value="72">72 hours</option>
-                <option value="168">7 days</option>
-              </select>
-            </div>
+            <>
+              <div className="form-group">
+                <label>Duration Unit</label>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <button
+                    type="button"
+                    className={`btn ${durationUnit === "minutes" ? "" : "btn-secondary"}`}
+                    onClick={() => {
+                      setDurationUnit("minutes");
+                      setDuration("60");
+                    }}
+                    style={{ flex: 1, fontSize: '0.9rem', padding: '0.5rem' }}
+                  >
+                    Minutes
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn ${durationUnit === "hours" ? "" : "btn-secondary"}`}
+                    onClick={() => {
+                      setDurationUnit("hours");
+                      setDuration("24");
+                    }}
+                    style={{ flex: 1, fontSize: '0.9rem', padding: '0.5rem' }}
+                  >
+                    Hours
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Auction Duration ({durationUnit})</label>
+                {durationUnit === "minutes" ? (
+                  <select
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    required
+                  >
+                    <option value="1">1 minute</option>
+                    <option value="5">5 minutes</option>
+                    <option value="10">10 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">60 minutes</option>
+                  </select>
+                ) : (
+                  <select
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    required
+                  >
+                    <option value="1">1 hour</option>
+                    <option value="6">6 hours</option>
+                    <option value="12">12 hours</option>
+                    <option value="24">24 hours</option>
+                    <option value="48">48 hours</option>
+                    <option value="72">72 hours</option>
+                    <option value="168">7 days</option>
+                  </select>
+                )}
+              </div>
+            </>
           )}
 
           {error && (

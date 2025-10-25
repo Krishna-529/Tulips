@@ -17,8 +17,8 @@ export function useBank() {
     if (!bank || !principal) return "0";
     try {
       const bal = await bank.icrc1_balance_of({
-        owner: Principal.fromText(principal),  // ensure proper Principal
-        subaccount: [],                        // null in Motoko → [] in JS
+        owner: Principal.fromText(principal),
+        subaccount: [],
       });
       return bal ? bal.toString() : "0";
     } catch (err) {
@@ -38,7 +38,7 @@ export function useBank() {
           subaccount: [],
         },
         amount: BigInt(amount),
-        fee: [],              // null → []
+        fee: [],
         memo: [],
         created_at_time: [],
       };

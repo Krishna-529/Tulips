@@ -4,7 +4,7 @@ import NFTCard from "./NFTCard";
 import BidNFT from "./BidNFT";
 
 export default function Marketplace() {
-  const { getAllNFTs, finalizeBid, principal } = useNFT();
+  const { getAllNFTs, finalizeBid, buyNFT, principal } = useNFT();
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -13,6 +13,7 @@ export default function Marketplace() {
   const [message, setMessage] = useState("");
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [buying, setBuying] = useState(null);
 
   useEffect(() => {
     loadNFTs();
@@ -65,10 +66,7 @@ export default function Marketplace() {
       setMessage("Finalizing auction...");
       const result = await finalizeBid(tokenId);
       if (result.success) {
-        setMessage(result.winner ? 
-          `Auction finalized! Winner: ${result.winner.slice(0,8)}...` : 
-          "Auction ended with no valid bids"
-        );
+        setMessage("Auction finalized successfully!");
         refreshMarketplace();
       } else {
         setMessage(`Failed to finalize: ${result.error}`);
@@ -77,6 +75,24 @@ export default function Marketplace() {
       setMessage(`Error: ${err.message}`);
     }
     setTimeout(() => setMessage(""), 5000);
+  };
+
+  const handleBuy = async (nft) => {
+    setBuying(nft.id);
+    try {
+      setMessage("Purchasing NFT...");
+      const result = await buyNFT(nft.id);
+      if (result.success) {
+        setMessage("NFT purchased successfully!");
+        refreshMarketplace();
+      } else {
+        setMessage(`Failed to purchase: ${result.error}`);
+      }
+    } catch (err) {
+      setMessage(`Error: ${err.message}`);
+    }
+    setTimeout(() => setMessage(""), 3000);
+    setBuying(null);
   };
 
   const sortNFTs = (nfts) => {
@@ -186,6 +202,7 @@ export default function Marketplace() {
               nft={nft}
               currentUser={principal}
               onBid={handleBidClick}
+              onBuy={handleBuy}
               onFinalize={handleFinalize}
               showBidButton={true}
             />

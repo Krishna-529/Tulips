@@ -11,7 +11,7 @@ import Nat64 "mo:base/Nat64";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
 
-// ICRC-1 Token Canister with 3% fee, one-time payout, debugBalances,
+// ICRC-1 Token Canister with 0.5% fee, one-time payout, debugBalances,
 // and a compatibility icrc1_transfer_from for your marketplace.
 actor class ICRC1Token() = this {
   // ---------- Types ----------
@@ -23,7 +23,7 @@ actor class ICRC1Token() = this {
     from_subaccount : ?Subaccount;
     to : Account;
     amount : Nat;
-    fee : ?Nat;            // Optional override not supported; enforced as 3%
+    fee : ?Nat;            // Optional override not supported; enforced as 0.5%
     memo : ?Blob;
     created_at_time : ?Timestamp;
   };
@@ -134,7 +134,7 @@ actor class ICRC1Token() = this {
       ("icrc1:name", #Text(NAME)),
       ("icrc1:symbol", #Text(SYMBOL)),
       ("icrc1:decimals", #Nat(Nat8.toNat(DECIMALS))),
-      ("fee_rate", #Text("3% of transfer amount"))
+      ("fee_rate", #Text("0.5% of transfer amount"))
     ]
   };
 
@@ -153,7 +153,7 @@ actor class ICRC1Token() = this {
       return #err(#GenericError { error_code = 1; message = "Cannot send to self" });
     };
 
-    let feeAmt : Nat = (args.amount * 3) / 100;
+    let feeAmt : Nat = (args.amount) / 200;
 
     if (args.fee != null and args.fee != ?feeAmt) {
       return #err(#BadFee { expected_fee = feeAmt });
@@ -234,7 +234,7 @@ actor class ICRC1Token() = this {
 
     let fromAcct : Account = { owner = args.from; subaccount = Option.map<[Nat8], Blob>(args.from_subaccount, Blob.fromArray) };
 
-    let feeAmt : Nat = (adapted.amount * 3) / 100;
+    let feeAmt : Nat = (adapted.amount) / 200;
     if (adapted.fee != null and adapted.fee != ?feeAmt) {
       return { error = ?("BadFee: expected " # Nat.toText(feeAmt)); height = 0 };
     };

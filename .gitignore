@@ -23,3 +23,34 @@ dist/
 
 # environment variables
 .env
+
+# Node modules
+node_modules/
+src/Tulips_frontend/node_modules/
+
+# Build outputs
+build/
+dist/
+src/Tulips_frontend/build/
+src/Tulips_frontend/dist/
+
+# DFX-generated files and cache
+.dfx/
+.dfxtemp/
+src/declarations/
+
+# VSCode settings
+.vscode/
+
+# Logs
+*.log
+
+# Environment variables / secrets
+.env
+.env.local
+.env.*.local
+
+# Mac / Linux files
+.DS_Store
+*.swp
+

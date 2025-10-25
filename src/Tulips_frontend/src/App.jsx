@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useBank } from "./hooks/useBank";
-import Bank from "./pages/Bank";
+import Bank from "./components/Bank";
 import NFTDashboard from "./components/NFTDashboard";
 import "./nft-style.css";
 

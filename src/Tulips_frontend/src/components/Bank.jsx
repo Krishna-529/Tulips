@@ -138,7 +138,7 @@ export default function Bank() {
             placeholder="Amount..."
           />
           <div className="transfer-fee">
-            <span>⚠️ 3% fee applies to each transfer</span>
+            <span>⚠️ 0.5% fee applies to each transfer</span>
           </div>
           <button
             className="btn"

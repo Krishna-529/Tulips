@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Base64Image from "./Base64Image";
 
-export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidButton = true }) {
+export default function NFTCard({ nft, currentUser, onBid, onFinalize, onBuy, showBidButton = true }) {
   const [timeLeft, setTimeLeft] = useState("");
   const [isExpired, setIsExpired] = useState(false);
   
   const isOwner = nft.owner === currentUser;
   const canBid = showBidButton && !isOwner && nft.status === "isOnBid" && !isExpired;
   const canFinalize = isOwner && nft.status === "isOnBid" && isExpired;
+  const canBuy = showBidButton && !isOwner && nft.status === "isOnSale";
 
   useEffect(() => {
     if (!nft.bidEndTime) return;
@@ -45,6 +46,10 @@ export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidBu
     if (onFinalize && canFinalize) onFinalize(nft.id);
   };
 
+  const handleBuyClick = () => {
+    if (onBuy && canBuy) onBuy(nft);
+  };
+
   const formatPrice = (price) => parseInt(price).toLocaleString();
 
   const getMinBidAmount = () => {
@@ -75,7 +80,16 @@ export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidBu
         </div>
 
         <div className="nft-price">
-          {formatPrice(nft.price)} <span className="token">DAMN</span>
+          {nft.status === "isOnBid" ? (
+            <>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Highest Bid: </span>
+              {formatPrice(nft.price)} <span className="token">DAMN</span>
+            </>
+          ) : (
+            <>
+              {formatPrice(nft.price)} <span className="token">DAMN</span>
+            </>
+          )}
         </div>
 
         {nft.status === "isOnBid" && nft.bidEndTime && (
@@ -93,6 +107,15 @@ export default function NFTCard({ nft, currentUser, onBid, onFinalize, showBidBu
               data-testid={`bid-button-${nft.id}`}
             >
               Place Bid
+            </button>
+          )}
+          {canBuy && (
+            <button 
+              className="btn" 
+              onClick={handleBuyClick}
+              data-testid={`buy-button-${nft.id}`}
+            >
+              Buy Now
             </button>
           )}
           {canFinalize && (
