@@ -52,19 +52,16 @@ actor Marketplace {
   var freezes : HashMap.HashMap<(Principal, Nat), Nat> = 
     HashMap.HashMap<(Principal, Nat), Nat>(10, equalTuple, hashTuple);
 
-  // ✅ Stable storage for NFTs
   stable var stableNFTs : [(Nat, NFT)] = [];
   var nfts : HashMap.HashMap<Nat, NFT> = HashMap.HashMap<Nat, NFT>(
     0, Nat.equal, func(n: Nat): Hash.Hash { Text.hash(Nat.toText(n)) }
   );
 
-  // ✅ HashMaps for sales and auctions
   stable var stableSales : [(Nat, Nat)] = [];
   var sales : HashMap.HashMap<Nat, Nat> = HashMap.HashMap<Nat, Nat>(
     0, Nat.equal, func(n: Nat): Hash.Hash { Text.hash(Nat.toText(n)) }
   );
 
-  // 🔹 Updated AuctionInfo with bidder subaccount and isActive flag
   public type AuctionInfo = {
     nftId : Nat;
     seller : Principal;
@@ -118,12 +115,10 @@ actor Marketplace {
     for ((id, auc) in stableAuctions.vals()) { auctions.put(id, auc); };
   };
 
-  // ---------------- EXISTING FUNCTIONS ---------------- //
-
   public shared(msg) func mintNFT(meta : Metadata) : async Text {
     let rnd = await Random.blob();
     let r = Nat8.toNat(Blob.toArray(rnd)[0]) % 21;
-    let feePercent = 40 + r; // 40–60%
+    let feePercent = 40 + r; 
 
     let mintFee = (meta.desiredPrice * feePercent) / 100;
     let finalPrice = meta.desiredPrice;
@@ -202,14 +197,12 @@ actor Marketplace {
     return owned;
   };
 
-  // ---------------- NEW AUCTION SYSTEM ---------------- //
-
   public shared(msg) func listForAuction(nftId : Nat, startingPrice : Nat, duration : Nat) : async Text {
     switch (nfts.get(nftId)) {
       case (?nft) {
         if (nft.owner != msg.caller) return "Error: Only owner can auction";
 
-        let fee = startingPrice / 100; // 1%
+        let fee = startingPrice / 100; 
         ignore await Dbank.icrc1_transfer_from_compat({
           from_subaccount = null;
           from = msg.caller;

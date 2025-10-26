@@ -8,12 +8,10 @@
 
     let src = base64String.trim();
 
-    // If it's an IPFS CID, use a public gateway
     if (src.startsWith("Qm") || src.startsWith("bafy")) {
       src = `https://ipfs.io/ipfs/${src}`;
     }
 
-    // If it's base64 without prefix, add it
     else if (!src.startsWith("data:image")) {
       src = `data:image/png;base64,${src}`;
     }

@@ -11,8 +11,6 @@ import Nat64 "mo:base/Nat64";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
 
-// ICRC-1 Token Canister with 0.5% fee, one-time payout, debugBalances,
-// and a compatibility icrc1_transfer_from for your marketplace.
 actor class ICRC1Token() = this {
   // ---------- Types ----------
   public type Timestamp = Nat64;
@@ -23,7 +21,7 @@ actor class ICRC1Token() = this {
     from_subaccount : ?Subaccount;
     to : Account;
     amount : Nat;
-    fee : ?Nat;            // Optional override not supported; enforced as 0.5%
+    fee : ?Nat;            
     memo : ?Blob;
     created_at_time : ?Timestamp;
   };
@@ -49,23 +47,17 @@ actor class ICRC1Token() = this {
   public type Std = { name : Text; url : Text };
   public type Result<T, E> = Result.Result<T, E>;
 
-  // ---------- Token constants ----------
   let NAME : Text = "DAMN Token";
   let SYMBOL : Text = "DAMN";
   let DECIMALS : Nat8 = 8;
   let INITIAL_SUPPLY : Nat = 1_000_000_000_000;
 
-  // Use the canister itself as the initial treasury/minting account
   let deployer : Principal = Principal.fromActor(this);
   let treasury : Account = { owner = deployer; subaccount = null };
 
-  // ---------- Stable state ----------
-  // Store balances and claimed flags across upgrades
   stable var stableBalances : [ (Account, Nat) ] = [];
   stable var stableClaims : [ (Principal, Bool) ] = [];
 
-  // ---------- In-memory state ----------
-  // Equality compares both owner and subaccount
   var balances : HashMap.HashMap<Account, Nat> = HashMap.HashMap<Account, Nat>(
     256,
     func(a : Account, b : Account) : Bool =
@@ -97,13 +89,11 @@ actor class ICRC1Token() = this {
     };
   };
 
-  // ---------- Constructor mint ----------
   ignore do {
     let cur = switch (balances.get(treasury)) { case (?b) b; case null 0 };
     balances.put(treasury, cur + INITIAL_SUPPLY);
   };
 
-  // ---------- ICRC-1 queries ----------
   public shared query func icrc1_name() : async Text { NAME };
 
   public shared query func icrc1_symbol() : async Text { SYMBOL };
@@ -179,7 +169,6 @@ actor class ICRC1Token() = this {
     #ok(0)
   };
 
-  // ---------- One-time payout ----------
   public shared(msg) func payOut() : async Text {
     let caller = msg.caller;
 
@@ -205,14 +194,10 @@ actor class ICRC1Token() = this {
     "Payout Successful"
   };
 
-  // ---------- Debug ----------
   public shared query func debugBalances() : async [ (Account, Nat) ] {
     Iter.toArray(balances.entries())
   };
 
-  //////////////////////////////////////////////////////////////////////
-  // Compatibility wrapper
-  //////////////////////////////////////////////////////////////////////
   public shared(msg) func icrc1_transfer_from_compat(args : {
       from_subaccount : ?[Nat8];
       from : Principal;
