@@ -9,10 +9,10 @@ This documentation is written to be an exhaustive guide to the system's inner wo
 ## 📚 Table of Contents
 
 1.  [System Architecture](#1-system-architecture)
-2.  [Opening an Account & Identity](#2-process-1-opening-an-account--identity)
-3.  [Minting an NFT (The Creation Engine)](#3-process-2-minting-an-nft-the-creation-engine)
-4.  [Direct Selling (Fixed Price Trading)](#4-process-3-direct-selling-fixed-price-trading)
-5.  [The Auction Mechanism (Escrow & Bidding)](#5-process-4-the-auction-mechanism-escrow--bidding)
+2.  [Opening an Account & Identity](#2-opening-an-account--identity)
+3.  [Minting an NFT (The Creation Engine)](#3-minting-an-nft-the-creation-engine)
+4.  [Direct Selling (Fixed Price Trading)](#4-direct-selling-fixed-price-trading)
+5.  [The Auction Mechanism (Escrow & Bidding)](#5-the-auction-mechanism-escrow--bidding)
 6.  [Technical Appendix: The Bank Ledger](#6-technical-appendix-the-bank-ledger)
 7.  [Installation & Deployment](#7-installation--deployment)
 
