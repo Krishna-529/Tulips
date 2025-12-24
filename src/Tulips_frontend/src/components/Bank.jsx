@@ -11,7 +11,6 @@ export default function Bank() {
   const [balanceVis, setBalanceVis] = useState(false);
   const [payoutClaimed, setPayoutClaimed] = useState(false);
 
-  // "Check balance" handler
   async function handleCheckBalance() {
     setBalance("...");
     const bal = await getBalance();
@@ -19,7 +18,6 @@ export default function Bank() {
     setBalanceVis(true);
   }
 
-  // "Claim payout" handler
   async function handlePayout() {
     setTxLoading(true);
     setMsg("Processing payout...");
@@ -38,7 +36,6 @@ export default function Bank() {
     setTxLoading(false);
   }
 
-  // "Transfer" handler
   async function handleTransfer(e) {
     e.preventDefault();
     setTxLoading(true);
@@ -56,7 +53,6 @@ export default function Bank() {
 
     setTimeout(() => {
       setTxLoading(false);
-      // only clear message if success, errors stay visible a bit longer
       if (result.ok) setMsg("");
     }, result.ok ? 1200 : 3000);
   }
@@ -73,7 +69,6 @@ export default function Bank() {
 
   return (
     <div className="dashboard bank-dashboard">
-      {/* ACCOUNT SECTION */}
       <div className="account-card">
         <span className="account-title">🪪 Your Account</span>
         <div className="account-principal">{principal}</div>
@@ -91,7 +86,6 @@ export default function Bank() {
         )}
       </div>
 
-      {/* PAYOUT SECTION */}
       <div className="payout-card">
         <span className="payout-title">🎁 Initial Payout</span>
         <div className="payout-desc">
@@ -111,7 +105,6 @@ export default function Bank() {
         )}
       </div>
 
-      {/* TRANSFER SECTION */}
       <div className="transfer-card">
         <span className="transfer-title">Transfer DAMN</span>
         <form
@@ -151,7 +144,6 @@ export default function Bank() {
         </form>
       </div>
 
-      {/* NOTIFICATION BAR */}
       {msg && <div className="notif">{msg}</div>}
     </div>
   );

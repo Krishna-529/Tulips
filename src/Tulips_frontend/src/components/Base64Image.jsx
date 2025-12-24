@@ -1,7 +1,6 @@
   import React from "react";
 
   export default function Base64Image({ base64String, alt = "NFT Image" }) {
-    // console.log(base64String);
     if (!base64String) {
       return <div style={{ color: "#999", textAlign: "center" }}>No image available</div>;
     }

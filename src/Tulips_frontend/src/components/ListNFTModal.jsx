@@ -6,7 +6,7 @@ export default function ListNFTModal({ nft, isOpen, onClose, onSuccess }) {
   const [listType, setListType] = useState("sale");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("24");
-  const [durationUnit, setDurationUnit] = useState("hours"); // "minutes" or "hours"
+  const [durationUnit, setDurationUnit] = useState("hours");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,7 +22,6 @@ export default function ListNFTModal({ nft, isOpen, onClose, onSuccess }) {
       if (listType === "sale") {
         result = await listForSale(nft.id, parseInt(price));
       } else {
-        // Convert to nanoseconds for auction duration
         const multiplier = durationUnit === "minutes" ? 60 : 3600;
         const durationNs = parseInt(duration) * multiplier * 1_000_000_000;
         result = await listForAuction(nft.id, parseInt(price), durationNs);

@@ -245,7 +245,6 @@ actor class ICRC1Token() = this {
     { error = null; height = 0 }
   };
 
-  // ---------- Backward-compatible wrapper ----------
   public shared(msg) func icrc1_transfer_from(args : {
     from_subaccount : ?[Nat8];
     to : Principal;

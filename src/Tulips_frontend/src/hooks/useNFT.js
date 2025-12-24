@@ -38,7 +38,6 @@ const mintNFT = useCallback(
     }
 
     try {
-      // Call the backend Motoko function
       const response = await marketplace.mintNFT(metadata);
 
       // The backend currently returns a text message, parse ID from it
@@ -49,7 +48,7 @@ const mintNFT = useCallback(
         success: true,
         error: null,
         tokenId,
-        message: response, // optional full message from backend
+        message: response, 
       };
     } catch (err) {
       console.error("Minting error:", err);
@@ -59,7 +58,6 @@ const mintNFT = useCallback(
   [marketplace]
 );
 
-  // Get NFT details
   const getNFTDetails = useCallback(async (nftId) => {
     if (!marketplace) return null;
     try {
@@ -71,13 +69,11 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
-  // Get all marketplace NFTs with auction details
   const getAllNFTs = useCallback(async () => {
     if (!marketplace) return [];
     try {
       const nfts = await marketplace.getAllNFTs();
       
-      // Fetch auction details for each NFT that's on auction
       const nftsWithAuctionData = await Promise.all(
         nfts.map(async (nft) => {
           const baseNft = {
@@ -89,7 +85,6 @@ const mintNFT = useCallback(
             status: nft.status
           };
 
-          // If NFT is on auction, fetch auction details
           if (nft.status === "isOnBid") {
             try {
               const auctionInfo = await marketplace.getAuctionInfo(nft.id);
@@ -97,7 +92,7 @@ const mintNFT = useCallback(
                 const auction = auctionInfo[0];
                 return {
                   ...baseNft,
-                  price: auction.highestBid.toString(), // Use highest bid as price
+                  price: auction.highestBid.toString(), 
                   bidEndTime: auction.endTime.toString(),
                   startPrice: auction.startPrice.toString(),
                   highestBidder: auction.highestBidder.length > 0 ? auction.highestBidder[0].toString() : null
@@ -124,13 +119,11 @@ const mintNFT = useCallback(
     if (!marketplace || !principal) return [];
     const all = await getAllNFTs();
 
-    // Make sure both sides are compared as strings
     return all.filter(nft => nft.owner === principal.toString());
   }, [marketplace, principal, getAllNFTs]);
 
 
 
-  // Place bid on NFT
   const placeBid = useCallback(async (nftId, bidAmount) => {
     if (!marketplace) return { success: false, error: "Marketplace not ready" };
     try {
@@ -142,7 +135,6 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
-  // Finalize auction
   const finalizeBid = useCallback(async (nftId) => {
     if (!marketplace) return { success: false, error: "Marketplace not ready" };
     try {
@@ -154,7 +146,6 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
-  // List NFT for sale
   const listForSale = useCallback(async (nftId, price) => {
     if (!marketplace) return { success: false, error: "Marketplace not ready" };
     try {
@@ -166,7 +157,6 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
-  // List NFT for auction
   const listForAuction = useCallback(async (nftId, startingPrice, duration) => {
     if (!marketplace) return { success: false, error: "Marketplace not ready" };
     try {
@@ -178,7 +168,6 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
-  // Withdraw NFT from sale/auction
   const withdrawNFT = useCallback(async (nftId) => {
     if (!marketplace) return { success: false, error: "Marketplace not ready" };
     try {
@@ -190,7 +179,6 @@ const mintNFT = useCallback(
     }
   }, [marketplace]);
 
-  // Buy NFT directly
   const buyNFT = useCallback(async (nftId) => {
     if (!marketplace) return { success: false, error: "Marketplace not ready" };
     try {

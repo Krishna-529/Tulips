@@ -1,105 +1,256 @@
-# Tulips — NFT Marketplace on Internet Computer
+# Tulips — The Comprehensive Guide to a Decentralized NFT Marketplace
 
-Tulips is a decentralized NFT Marketplace built on the **Internet Computer (IC)** using **Motoko** canisters for backend logic and a **React frontend** for user interaction.  
-It allows users to mint, own, list, and purchase NFTs — all managed directly on-chain without depending on external storage or third-party APIs.
+**Tulips** is a full-stack, decentralized NFT marketplace built entirely on the **Internet Computer (IC)** blockchain. Unlike traditional dApps that often rely on a patchwork of services (AWS for frontend, IPFS for storage, Ethereum for logic), Tulips is a **monolithic** application where the frontend, backend logic, database, and asset storage all live on-chain.
 
-All NFT images and metadata are stored **entirely on-chain**, providing a fully decentralized and tamper-proof representation of ownership and content.
-
----
-
-## 🌐 Project Overview
-
-Tulips demonstrates how a complete NFT trading platform can be implemented natively on the Internet Computer.  
-The system is composed of two core canisters:
-
-1. **Marketplace Canister** — manages NFT creation, ownership, metadata, and trade actions (minting, listing, buying, and removing from sale).  
-2. **Bank (dBank) Canister** — functions as an internal ledger that securely handles all currency movements such as deposits, withdrawals, and NFT transaction payments.
-
-The frontend, written in React, interacts directly with these canisters through agent calls and provides a clean, minimal, dark-themed interface for performing all actions.
+This documentation is written to be an exhaustive guide to the system's inner workings. It breaks down every major user interaction—from creating an account to finalizing a complex auction—explaining the **cryptographic mechanisms**, **economic logic**, and **code execution** that occurs at each step.
 
 ---
 
-## ⚙️ Core Features
+## 📚 Table of Contents
 
-### 🪙 1. NFT Minting
-- Users can mint NFTs by uploading an image and providing metadata (name and description).  
-- The image file is converted to binary (`Blob`) format and stored **directly on-chain** in the Marketplace canister.  
-- Each NFT is given a **unique ID**, typically derived from a hashed or incremented counter, ensuring that no two NFTs overlap.  
-- Ownership of the newly minted NFT is automatically assigned to the minting user’s **Principal**.  
-- A minting fee is deducted from the user’s account in the **Bank canister** before the minting succeeds.
-
-### 🏪 2. Listing and Buying NFTs
-- NFT owners can **list** their tokens for sale by specifying a price.  
-- When an NFT is listed, it is marked as “for sale” within the canister’s data.  
-- Other users can then **buy** the NFT directly by paying the listed price.  
-- The Bank canister ensures that the payment transfer is successful before ownership is updated in the Marketplace.  
-- Once purchased, the NFT’s ownership moves from the seller’s Principal to the buyer’s Principal.  
-- NFTs that are listed appear **blurred or semi-transparent** under the “My NFTs” section, indicating they are not currently transferable by the owner.
-
-### 🏦 3. Bank (dBank) System
-- The dBank canister maintains an internal ledger mapping each user’s **Principal → Balance (Nat)**.  
-- Users can deposit and withdraw tokens, which are then reflected in their on-chain balance.  
-- During NFT minting or purchasing:
-  - Minting fees are deducted from the creator’s balance.
-  - Purchase payments are securely transferred between buyer and seller balances.
-- The dBank canister ensures that all financial actions are **atomic** with respect to NFT ownership changes — preventing partial updates.
-
-### 💬 4. User Authentication
-- Authentication and user identification are handled via **Internet Identity**.  
-- Each authenticated user is mapped to their unique Principal, which serves as both their account identifier and NFT owner key.  
-- All state changes, balances, and NFT actions are tied directly to this Principal.
-
-### ⏳ 5. Bidding (UI Only)
-- A **bidding/auction interface** is scaffolded in the frontend but **not yet implemented in backend logic**.  
-- The UI allows users to view “Put for Auction” and “Place Bid” options with modals, placeholders, and future integration points.  
-- These components are designed for eventual extension into a timed bidding mechanism, but the current system operates purely as a direct sale marketplace.
+1.  [System Architecture](#1-system-architecture)
+2.  [Opening an Account & Identity](#2-process-1-opening-an-account--identity)
+3.  [Minting an NFT (The Creation Engine)](#3-process-2-minting-an-nft-the-creation-engine)
+4.  [Direct Selling (Fixed Price Trading)](#4-process-3-direct-selling-fixed-price-trading)
+5.  [The Auction Mechanism (Escrow & Bidding)](#5-process-4-the-auction-mechanism-escrow--bidding)
+6.  [Technical Appendix: The Bank Ledger](#6-technical-appendix-the-bank-ledger)
+7.  [Installation & Deployment](#7-installation--deployment)
 
 ---
 
-## 💡 Implementation Logic
+## 1. System Architecture
 
-### Marketplace Canister (Motoko)
-- Maintains mappings of NFT IDs to their full metadata, image blob, and ownership record.  
-- Provides functions:
-  - `mintNFT(owner, name, description, image)`  
-  - `getMyNFTs(principal)`  
-  - `listNFT(id, price)`  
-  - `buyNFT(id)`  
-  - `transferOwnership(id, newOwner)`  
-  - `getAllListedNFTs()`
-- Verifies ownership before allowing listing or transfers.  
-- Handles state updates atomically to maintain consistency across minting and purchasing.
+Before diving into the workflows, it is crucial to understand the three pillars of the Tulips ecosystem. The application follows the **Actor Model**, where different "canisters" (smart contracts) run independently and communicate via asynchronous messages.
 
-### Bank Canister (Motoko)
-- Keeps a balance ledger for each user Principal.  
-- Provides methods:
-  - `deposit()`
-  - `withdraw(amount)`
-  - `transfer(from, to, amount)`
-  - `deductMintFee(principal, fee)`
-- Called internally by Marketplace functions to process payments during mint and sale operations.  
-- Prevents unauthorized balance changes by validating caller Principal.
+### The Components
 
-### Frontend (React)
-- Built using **React + DFX agent calls** to interact with deployed canisters.  
-- Provides three major pages:
-  - **Mint NFT** — Form for minting with image upload and metadata entry.  
-  - **Marketplace** — Displays all NFTs listed for sale with “Buy” buttons.  
-  - **My NFTs** — Displays owned NFTs, indicating which ones are listed.  
-- The UI uses a **dark theme** for a professional marketplace look and includes modals for key actions (minting, listing, buying, and bidding placeholders).
+1.  **The Frontend (React/Vite)**:
+    *   Hosted directly on the IC as an asset canister.
+    *   Uses `@dfinity/agent` to sign messages with the user's private key (managed by Internet Identity) and send them to the backend.
+    *   **Role**: The interface for state visualization and transaction initiation.
+
+2.  **The Marketplace Canister (Motoko)**:
+    *   **Role**: The "Brain" of the operation.
+    *   **Storage**: Holds the entire state of NFTs (metadata, owners, status) in its heap memory.
+    *   **Logic**: Executes the rules of trade, manages auction timers, and instructs the Bank to move funds.
+
+3.  **The DBank Canister (Motoko)**:
+    *   **Role**: The "Vault".
+    *   **Storage**: Maintains a ledger mapping `Principal -> Balance`.
+    *   **Logic**: Handles minting of the native token ("DAMN"), transfers between users, and treasury management.
 
 ---
 
-## 🧠 Technical Insights
+## 2. Opening an Account & Identity
 
-- **On-Chain Storage:** Storing image blobs directly in the canister state ensures full decentralization but requires careful memory management due to size constraints.  
-- **Ownership Verification:** Every listing and transfer action validates `msg.caller == nft.owner` before proceeding.  
-- **Atomic Operations:** Payment and ownership transfer are designed to occur together — if one fails, both revert.  
-- **Cycle Efficiency:** Storing and retrieving image blobs are the most cycle-intensive operations; optimization and compression may be added later.  
-- **Security Measures:** All actions are scoped to authenticated principals; no user can list or transfer NFTs they don’t own.
+On the Internet Computer, there are no "wallets" in the browser extension sense (like MetaMask). Instead, users authenticate via **Internet Identity (II)**.
+
+### Step-by-Step Workflow
+
+1.  **User Arrives**: The user visits the Tulips URL.
+2.  **Authentication**: The user clicks "Login". They are redirected to `identity.ic0.app`.
+    *   **Mechanism**: The user authenticates using a passkey (FaceID, TouchID, or YubiKey).
+    *   **Result**: The II protocol generates a unique **Principal ID** specifically for the Tulips dApp. This prevents cross-site tracking.
+3.  **Session Creation**: The frontend receives this Principal and creates an `HttpAgent`. This agent will now sign every subsequent request.
+
+### The "Faucet" Mechanism (Getting Started)
+
+Since this is a custom token economy, a new user starts with 0 DAMN tokens. To allow testing, we implemented a Faucet.
+
+**The Code Flow (`dbank/main.mo`):**
+
+```motoko
+public shared(msg) func payOut() : async Text {
+    let caller = msg.caller; // The Principal of the user
+
+    // 1. Check for Double-Dipping
+    switch (claimed.get(caller)) {
+      case (?true) { return "Already Claimed" };
+      case _ {};
+    };
+
+    // 2. Verify Treasury Solvency
+    let payoutAmount : Nat = 10_000;
+    // ... check treasury balance ...
+
+    // 3. Execute Transfer (Atomic State Update)
+    balances.put(treasury, treasBal - payoutAmount);
+    balances.put(userAcct, userBal + payoutAmount);
+
+    // 4. Mark as Claimed
+    claimed.put(caller, true);
+    "Payout Successful"
+};
+```
+
+**Explanation**:
+*   The system uses a `HashMap` called `claimed` to track who has received tokens.
+*   The transfer is **atomic**: the deduction from the treasury and the addition to the user happen in the same execution block. If the code traps (crashes) halfway, the entire state rolls back.
 
 ---
 
+## 3. Minting an NFT (The Creation Engine)
+
+Minting in Tulips is not just about uploading an image; it involves a **gamified economic cost**. The protocol charges a dynamic fee based on the asset's perceived value.
+
+### Step-by-Step Workflow
+
+1.  **User Input**:
+    *   User uploads an image (converted to Base64 in the browser).
+    *   User sets a **Desired Price** (e.g., 100 DAMN). This is the price they *intend* to sell it for later.
+
+2.  **Fee Calculation (The "Secret Sauce")**:
+    *   The user clicks "Mint".
+    *   The `Marketplace` canister receives the request.
+    *   It requests a **Random Blob** from the IC management canister.
+    *   It calculates a random percentage between **40% and 60%**.
+
+    **Code Snippet (`marketplace/main.mo`):**
+    ```motoko
+    let rnd = await Random.blob();
+    let r = Nat8.toNat(Blob.toArray(rnd)[0]) % 21; // 0 to 20
+    let feePercent = 40 + r; // 40 to 60
+    let mintFee = (meta.desiredPrice * feePercent) / 100;
+    ```
+
+3.  **Payment Execution**:
+    *   The Marketplace must now collect this `mintFee`.
+    *   It calls the DBank's `icrc1_transfer_from_compat`.
+    *   **Mechanism**: The DBank trusts the Marketplace canister to move funds from the User to the Treasury *without* a prior approval transaction. This streamlines UX.
+
+4.  **Asset Creation**:
+    *   If the transfer succeeds, the NFT is created in memory.
+    *   **Storage**:
+        ```motoko
+        let nft : NFT = {
+          id = nextNFTId;
+          owner = msg.caller; // Assigned to the creator
+          name = meta.name;
+          image = meta.image; // Stored fully on-chain
+          price = meta.desiredPrice;
+          status = "Owned";
+        };
+        nfts.put(nftId, nft);
+        ```
+
+---
+
+## 4. Direct Selling (Fixed Price Trading)
+
+This is the standard e-commerce flow. A user lists an item, and another user buys it instantly.
+
+### Phase A: Listing the Item
+
+1.  **Initiation**: The owner calls `placeForSale(nftId, price)`.
+2.  **Listing Fee**:
+    *   To prevent spam, the protocol charges a **1% non-refundable listing fee**.
+    *   The Marketplace calculates `price / 100` and transfers it to the Treasury immediately.
+3.  **State Update**:
+    *   The NFT status changes to `"isOnSale"`.
+    *   A `SaleInfo` object is created in the `salesInfo` HashMap.
+
+### Phase B: The Purchase
+
+1.  **Buyer Action**: A different user calls `buyNFT(nftId)`.
+2.  **Validation**: The system checks if the sale is active.
+3.  **The Financial Transaction**:
+    *   **Step 1 (Payment)**: The full price is transferred from the **Buyer** to the **Seller**.
+    *   **Step 2 (Commission)**: The protocol automatically deducts a **2.5% commission** from the **Seller** and moves it to the Treasury.
+
+    **Code Snippet (`marketplace/main.mo`):**
+    ```motoko
+    // 1. Buyer pays Seller
+    ignore await Dbank.icrc1_transfer_from_compat({
+      from = msg.caller; to = sale.seller; amount = sale.price; ...
+    });
+
+    // 2. Seller pays Protocol (Commission)
+    let commission = (sale.price * 25) / 1000; // 2.5%
+    ignore await Dbank.icrc1_transfer_from_compat({
+      from = sale.seller; to = Treasury; amount = commission; ...
+    });
+    ```
+
+4.  **Ownership Transfer**:
+    *   The `nft.owner` field is updated to the Buyer's Principal.
+    *   The `SaleInfo` is marked inactive.
+
+---
+
+## 5. The Auction Mechanism (Escrow & Bidding)
+
+The auction system is the most complex part of Tulips. It solves the problem of **trustless bidding**: How do we ensure a bidder has the money without taking it from them permanently?
+
+**The Solution: Deterministic Subaccounts.**
+
+### Phase A: Starting the Auction
+
+1.  **Listing**: The owner calls `listForAuction(nftId, startPrice, duration)`.
+2.  **Fee**: A 1% listing fee is paid to the Treasury.
+3.  **State**: An `AuctionInfo` object is created with an `endTime` (Current Time + Duration).
+
+### Phase B: Placing a Bid (The Escrow Logic)
+
+When a user places a bid, we don't send the money to the seller (the auction isn't over), nor do we keep it in the bidder's main account (they might spend it). We move it to a **Subaccount**.
+
+**Mechanism: Subaccount Hashing**
+Every Bidder + NFT combination has a unique subaccount address derived mathematically.
+
+```motoko
+func subaccountHash(user : Principal, nftId : Nat) : Blob {
+    // Combine User ID and NFT ID
+    let combinedText = Principal.toText(user) # "-" # Nat.toText(nftId);
+    // Hash it to get a unique 32-byte identifier
+    return Text.hash(combinedText);
+};
+```
+
+**The Bidding Steps:**
+1.  **New Bidder** (`User B`) bids 500 DAMN.
+2.  **Lock Funds**: The system transfers 500 DAMN from `User B (Main)` -> `User B (Subaccount for NFT #123)`.
+    *   *Note*: The funds are still technically "owned" by User B's principal, but they are in a specific "slot" that only the Marketplace can control.
+3.  **Refund Previous**:
+    *   If `User A` was the previous highest bidder (with 400 DAMN locked), the system detects this.
+    *   It transfers 400 DAMN from `User A (Subaccount for NFT #123)` -> `User A (Main)`.
+    *   This ensures the loser gets their money back instantly.
+
+### Phase C: Finalizing the Auction
+
+Once the time expires, the `finalizeAuction` function is called (by the seller or winner).
+
+1.  **Validation**: Checks if `Time.now() > auction.endTime`.
+2.  **Payout**:
+    *   The funds are sitting in the **Winner's Subaccount**.
+    *   The system transfers `HighestBid` from **Winner (Subaccount)** -> **Seller (Main)**.
+3.  **Commission**:
+    *   The system transfers 2.5% from **Seller (Main)** -> **Treasury**.
+4.  **Asset Transfer**:
+    *   The NFT ownership is updated to the Winner.
+
+---
+
+## 6. Technical Appendix: The Bank Ledger
+
+The `DBank` canister is the financial backbone. It implements a simplified version of the **ICRC-1 Token Standard**.
+
+### The "Privileged" Transfer
+Standard token transfers require a two-step `approve` + `transferFrom` process. To make the Tulips UX smooth (no popups for every tiny fee), we implemented a "Compatible" transfer function that trusts the Marketplace.
+
+```motoko
+// In dbank/main.mo
+public shared(msg) func icrc1_transfer_from_compat(args : ...) {
+    // This function allows the caller (Marketplace) to move funds
+    // from 'args.from' WITHOUT checking for an allowance.
+    
+    // In a production mainnet deployment, we would add:
+    // if (msg.caller != MARKETPLACE_CANISTER_ID) return Error("Unauthorized");
+}
+```
+
+This design choice prioritizes **User Experience** for the demo, allowing for "One-Click" minting and bidding.
+
+---
+---
 ## 🚧 Current Limitations
 - NFT media storage on-chain can increase canister size; future versions may include hybrid IPFS links.  
 - Bidding/auction logic exists only in the frontend UI; backend integration is pending.  
@@ -116,7 +267,46 @@ The frontend, written in React, interacts directly with these canisters through 
 - Expand Bank canister to integrate with actual token standards (DIP20 or ICP).
 
 ---
+---
 
-## 📬 Maintainer
-**Krishna Satyam**  
-For suggestions or improvements, please open an issue in the repository.
+## 7. Installation & Deployment
+
+To run this entire ecosystem locally on your machine:
+
+### Prerequisites
+*   **Node.js** (v18+)
+*   **DFX SDK** (The Internet Computer SDK)
+
+### Step 1: Start the Local Blockchain
+Open a terminal and start the local replica in the background.
+```bash
+dfx start --clean --background
+```
+
+### Step 2: Deploy the Canisters
+This command compiles the Motoko backend and the React frontend, generates the Candid interfaces, and installs them on the local replica.
+```bash
+dfx deploy
+```
+
+### Step 3: Launch the Frontend
+While `dfx deploy` uploads a static build, for development (hot-reloading), run the Vite server:
+```bash
+cd src/Tulips_frontend
+npm install
+npm run dev
+```
+
+### Step 4: Testing the Flow
+1.  Open `localhost:5173` (or the URL provided).
+2.  **Login** with Internet Identity.
+3.  **Claim Tokens** via the Navbar button.
+4.  **Mint** an NFT (upload any image).
+5.  **List** it for sale.
+6.  Open an **Incognito Window**, create a *second* account, claim tokens, and **Buy** the NFT.
+
+---
+
+**Author**: Krishna Satyam
+**License**: MIT
+**Status**: Educational / Demo

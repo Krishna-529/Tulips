@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import "../main.css";
 
 
 export default function MintNFTForm({ onMint }) {
